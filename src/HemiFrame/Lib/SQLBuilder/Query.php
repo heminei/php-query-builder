@@ -118,7 +118,7 @@ class Query
 
     /**
      *
-     * @var string
+     * @var string|int
      */
     private $limit = null;
 
@@ -903,13 +903,12 @@ class Query
     }
 
     /**
-     *
-     * @param string $string
+     * @param string|int $limit
      * @return $this
      */
-    public function limit(string $string): self
+    public function limit($limit): self
     {
-        $this->limit = $string;
+        $this->limit = $limit;
         return $this;
     }
 
