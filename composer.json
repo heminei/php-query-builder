@@ -1,0 +1,31 @@
+{
+    "name": "hemiframe/php-query-builder",
+    "description": "Powerful and lightweight PHP SQL Query Builder",
+    "version": "1.0.1",
+    "keywords": [
+        "PHP",
+        "SQL builder",
+        "Query Builder"
+    ],
+    "license": "MIT",
+    "authors": [{
+        "name": "Martin",
+        "email": "heminei@heminei.com",
+        "role": "Developer"
+    }],
+    "support": {
+        "issues": "https://github.com/heminei/php-query-builder/issues"
+    },
+    "autoload": {
+        "psr-4": {
+            "HemiFrame\\": "src/HemiFrame"
+        }
+    },
+    "require": {
+        "php": ">=7.1",
+        "psr/simple-cache": "^1.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^0.12.25"
+    }
+}
