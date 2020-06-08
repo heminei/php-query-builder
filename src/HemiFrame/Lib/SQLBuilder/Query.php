@@ -1193,7 +1193,7 @@ class Query
             }
         }
 
-        return trim($queryString) . ';';
+        return trim($queryString);
     }
 
     /**
