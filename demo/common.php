@@ -66,8 +66,6 @@ $query->andWhere("status", 2, '!=');
 $query->andWhere("id", [1, 2, 3]);
 $query->andWhere("id", [10, 20, 30], '!=');
 
-$query->onDuplicateKeyUpdate("email=:testVar")->setVar('testVar', 'testemail@test.com');
-
 // $query->execute();
 var_dump($query->getQueryString(true));
 
@@ -78,6 +76,22 @@ $query->delete()->from("users");
 $query->andWhere("status", 2, '!=');
 $query->andWhere("id", [1, 2, 3]);
 $query->andWhere("id", [10, 20, 30], '!=');
+$query->limit("1000");
+
+// $query->execute();
+var_dump($query->getQueryString(true));
+
+echo PHP_EOL . "Sub query: " . PHP_EOL . PHP_EOL;
+$queryInner = new \HemiFrame\Lib\SQLBuilder\Query();
+$queryInner->select()->from("user");
+$queryInner->andWhere("isActive", 1);
+
+$query = new \HemiFrame\Lib\SQLBuilder\Query();
+$query->select([
+    "u.id",
+    "u.name",
+])->from($queryInner, "u");
+$query->andWhere("status", 2, '!=');
 $query->limit("1000");
 
 // $query->execute();
