@@ -701,14 +701,15 @@ class Query
     /**
      *
      * @param mixed $table
+     * @param string $alias
      * @return $this
      */
-    public function update($table): self
+    public function update($table, $alias = ""): self
     {
         if (empty($table)) {
             throw new QueryException("Enter table name");
         }
-        $this->setTables($table);
+        $this->setTables($table, $alias);
         $this->setQueryType("update");
         return $this;
     }
