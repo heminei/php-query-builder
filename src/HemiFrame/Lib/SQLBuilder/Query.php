@@ -552,7 +552,7 @@ class Query
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
                 $data = $this->resultCacheImplementation->get($cacheKey);
-                if (is_array($data) || $data == null) {
+                if (is_array($data)) {
                     return $data;
                 }
             }
@@ -560,7 +560,7 @@ class Query
 
         $data = $this->execute()->fetch(\PDO::FETCH_ASSOC);
         if (!is_array($data) && $data !== null) {
-            $data = null;
+            $data = [];
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
