@@ -7,7 +7,6 @@ namespace HemiFrame\Lib\SQLBuilder;
  */
 class Query
 {
-
     const DEFAULT_VALUE = "f056c6dc7b3fc49ea4655853bea9b1d4e637a52d3d4a582985175f513fb9589241e21657f686e633c36760416031546cfe283d9961b9ac19aa2c45175dbbc9dd";
 
     /**
@@ -21,6 +20,7 @@ class Query
         "executedQueries" => [],
         "resultCache" => [
             "implementation" => null,
+            "prefix" => "query-result-cache",
         ],
     ];
 
@@ -417,14 +417,15 @@ class Query
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = __METHOD__ . "-" . $this->getQueryString(true);
+            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                $data = $this->resultCacheImplementation->get($cacheKey);
-                if (is_array($data)) {
-                    return $data;
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                $resultData = $this->resultCacheImplementation->get($cacheKey);
+                if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
+                    return $resultData->getData();
                 }
             }
         }
@@ -435,7 +436,9 @@ class Query
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $this->resultCacheImplementation->set($cacheKey, $data, $this->resultCacheLifeTime);
+            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+            $resultData->setData($data);
+            $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
 
         return $data;
@@ -449,14 +452,15 @@ class Query
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = __METHOD__ . "-" . $this->getQueryString(true);
+            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                $data = $this->resultCacheImplementation->get($cacheKey);
-                if (is_object($data) || $data == null) {
-                    return $data;
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                $resultData = $this->resultCacheImplementation->get($cacheKey);
+                if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
+                    return $resultData->getData();
                 }
             }
         }
@@ -467,7 +471,9 @@ class Query
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $this->resultCacheImplementation->set($cacheKey, $data, $this->resultCacheLifeTime);
+            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+            $resultData->setData($data);
+            $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
 
         return $data;
@@ -481,14 +487,15 @@ class Query
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = __METHOD__ . "-" . $this->getQueryString(true);
+            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                $data = $this->resultCacheImplementation->get($cacheKey);
-                if (is_array($data)) {
-                    return $data;
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                $resultData = $this->resultCacheImplementation->get($cacheKey);
+                if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
+                    return $resultData->getData();
                 }
             }
         }
@@ -499,7 +506,9 @@ class Query
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $this->resultCacheImplementation->set($cacheKey, $data, $this->resultCacheLifeTime);
+            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+            $resultData->setData($data);
+            $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
 
         return $data;
@@ -514,14 +523,15 @@ class Query
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = __METHOD__ . "-" . $this->getQueryString(true);
+            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                $data = $this->resultCacheImplementation->get($cacheKey);
-                if (is_array($data)) {
-                    return $data;
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                $resultData = $this->resultCacheImplementation->get($cacheKey);
+                if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
+                    return $resultData->getData();
                 }
             }
         }
@@ -532,7 +542,9 @@ class Query
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $this->resultCacheImplementation->set($cacheKey, $data, $this->resultCacheLifeTime);
+            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+            $resultData->setData($data);
+            $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
 
         return $data;
@@ -546,14 +558,15 @@ class Query
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = __METHOD__ . "-" . $this->getQueryString(true);
+            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                $data = $this->resultCacheImplementation->get($cacheKey);
-                if (is_array($data) || $data == null) {
-                    return $data;
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                $resultData = $this->resultCacheImplementation->get($cacheKey);
+                if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
+                    return $resultData->getData();
                 }
             }
         }
@@ -564,7 +577,9 @@ class Query
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $this->resultCacheImplementation->set($cacheKey, $data, $this->resultCacheLifeTime);
+            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+            $resultData->setData($data);
+            $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
 
         return $data;
