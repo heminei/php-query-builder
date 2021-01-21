@@ -57,9 +57,9 @@ var_dump($query->getQueryString(true));
 
 echo PHP_EOL . "Update query: " . PHP_EOL . PHP_EOL;
 $query = new \HemiFrame\Lib\SQLBuilder\Query();
-$query->update("users")->set([
-    "name" => 'Test',
-    "email" => 'test@test.com',
+$query->update("users", "u")->set([
+    "u.name" => 'Test',
+    "u.email" => 'test@test.com',
 ]);
 $query->set('totalViews = totalViews + 1');
 $query->andWhere("status", 2, '!=');

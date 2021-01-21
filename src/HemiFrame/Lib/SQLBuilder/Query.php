@@ -1136,12 +1136,12 @@ class Query
                      * ADD SET COLUMNS
                      */
                     $setColumns = array_map(function ($array) use ($newLine) {
-                        $column = $array["column"];
+                        $column = $this->escapeString($array["column"]);
                         $parameter = $array["parameter"];
                         if ($parameter === false) {
                             return $column . $newLine;
                         } else {
-                            return "`" . $column . "`=$parameter" . $newLine;
+                            return $column . "=$parameter" . $newLine;
                         }
                     }, $this->setColumns);
                     $queryString .= "SET" . $newLine . $tab . implode("$tab,", $setColumns);
