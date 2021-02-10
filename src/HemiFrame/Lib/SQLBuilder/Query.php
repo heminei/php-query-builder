@@ -962,9 +962,6 @@ class Query
         if ($this->plainQueryString !== null) {
             $queryString = $this->plainQueryString;
         } else {
-            if (empty($this->tables)) {
-                throw new QueryException("Enter table");
-            }
             if ($this->getQueryType() === null) {
                 throw new QueryException("Set query type (insertInto, insertIgnore, insertDelayed, select, update, delete)");
             }
@@ -1170,13 +1167,18 @@ class Query
                     break;
                 case "delete":
                     $queryString .= "DELETE " . $newLine;
-                     /**
+
+                    /**
                      * ADD SELECTED COLUMNS
                      */
                     $tables = array_map(function ($column) use ($newLine) {
                         return trim($column) . $newLine;
                     }, $this->columns);
-                    $queryString .= $tab . implode("$tab,", $tables);
+                    if (!empty($this->tables)) {
+                        $queryString .= $tab . implode("$tab,", $tables);
+                    } else {
+                        $this->setTables(trim(reset($this->columns)));
+                    }
 
                     $queryString .= "FROM " . $newLine;
 
