@@ -81,6 +81,19 @@ $query->limit("1000");
 // $query->execute();
 var_dump($query->getQueryString(true));
 
+echo PHP_EOL . "Delete query with join: " . PHP_EOL . PHP_EOL;
+$query = new \HemiFrame\Lib\SQLBuilder\Query();
+$query->delete("u")->from("users", "u");
+$query->leftJoin("emails", "e", "e.userId=u.id");
+$query->andWhere("e.status", 2, '!=');
+$query->andWhere("u.id", [1, 2, 3]);
+$query->andWhere("u.id", [10, 20, 30], '!=');
+$query->andWhere("e.status", 1);
+$query->limit("1000");
+
+// $query->execute();
+var_dump($query->getQueryString(true));
+
 echo PHP_EOL . "Sub query: " . PHP_EOL . PHP_EOL;
 $queryInner = new \HemiFrame\Lib\SQLBuilder\Query();
 $queryInner->select()->from("user");

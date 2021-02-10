@@ -240,6 +240,37 @@ WHERE
 LIMIT 1000
 ```
 
+## Delete query with joins
+
+```php
+<?php
+$query = new \HemiFrame\Lib\SQLBuilder\Query();
+$query->delete("u")->from("users", "u");
+$query->leftJoin("emails", "e", "e.userId=u.id");
+$query->andWhere("e.status", 2, '!=');
+$query->andWhere("u.id", [1, 2, 3]);
+$query->andWhere("u.id", [10, 20, 30], '!=');
+$query->andWhere("e.status", 1);
+$query->limit("1000");
+```
+
+Output:
+
+```sql
+DELETE
+  u
+FROM
+  users AS u
+LEFT JOIN emails AS e
+  ON e.userId=u.id
+WHERE
+  e.status!=2
+  AND u.id IN (1,2,3)
+  AND u.id NOT IN (10,20,30)
+  AND e.status=1
+LIMIT 1000
+```
+
 ## Fetching data
 
 Fetch data as array of arrays

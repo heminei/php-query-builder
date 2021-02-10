@@ -741,16 +741,18 @@ class Query
     }
 
     /**
-     *
      * @param mixed $table
      * @return $this
      */
     public function delete($table = null): self
     {
-        if (!empty($table)) {
-            $this->setTables($table);
-        }
         $this->setQueryType("delete");
+        if (is_string($table)) {
+            $arrayColumns = explode(",", $table);
+            $this->columns = array_merge($this->columns, $arrayColumns);
+        } elseif (is_array($table)) {
+            $this->columns = array_merge($this->columns, $table);
+        }
         return $this;
     }
 
@@ -1167,12 +1169,34 @@ class Query
 
                     break;
                 case "delete":
-                    $queryString .= "DELETE FROM" . $newLine;
+                    $queryString .= "DELETE " . $newLine;
+                     /**
+                     * ADD SELECTED COLUMNS
+                     */
+                    $tables = array_map(function ($column) use ($newLine) {
+                        return trim($column) . $newLine;
+                    }, $this->columns);
+                    $queryString .= $tab . implode("$tab,", $tables);
+
+                    $queryString .= "FROM " . $newLine;
 
                     /**
                      * Parse tables
                      */
                     $queryString .= $this->parseTables($newLine, $tab);
+
+                    /**
+                     * ADD JOIN TABLES
+                     */
+                    foreach ($this->joinTables as $joinTable) {
+                        if ($joinTable['table'] instanceof self) {
+                            $joinTable['table'] = "(" . $joinTable['table']->getQueryString() . ")";
+                        }
+                        if (!empty($joinTable['alias'])) {
+                            $joinTable['alias'] = " AS " . $joinTable['alias'];
+                        }
+                        $queryString .= trim($joinTable['type'] . ' ' . $joinTable['table'] . $joinTable['alias'] . $newLine . $tab . "ON " . $joinTable['relation']) . " " . $newLine;
+                    }
 
                     /**
                      * PARSE WHERE CONDITIONS
