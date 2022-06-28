@@ -413,7 +413,7 @@ class Query
      *
      * @return array
      */
-    public function fetchObjects(): array
+    public function fetchObjects(?string $hydrationClass = null): array
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
@@ -433,6 +433,75 @@ class Query
         $data = $this->execute()->fetchAll(\PDO::FETCH_OBJ);
         if (!is_array($data)) {
             $data = [];
+        }
+
+        if (!empty($hydrationClass)) {
+            if (!class_exists($hydrationClass)) {
+                throw new \InvalidArgumentException("Hydration class ($hydrationClass) not found");
+            }
+            $reflectionClass = new \ReflectionClass($hydrationClass);
+
+            foreach ($data as $key => $value) {
+                $objectInstance = $reflectionClass->newInstance();
+
+                foreach ($reflectionClass->getProperties() as $property) {
+                    if (!property_exists($value, $property->getName())) {
+                        continue;
+                    }
+
+                    $type = "";
+                    $docComment = $property->getDocComment();
+
+                    if (version_compare(PHP_VERSION, '7.4.0') >= 0 && !empty($property->getType())) {
+                        $type = trim(strtolower($property->getType()->getName()));
+                        if ($property->getType()->allowsNull()) {
+                            $type = $type . "|null";
+                        }
+                    } elseif (!empty($docComment)) {
+                        if (preg_match('/@var\s+([^\s]+)/', $docComment, $matches)) {
+                            $type = trim(strtolower($matches[1]));
+                        }
+                    }
+
+                    $property->setAccessible(true);
+
+                    /**
+                     * check for nullable
+                     */
+                    if (in_array("null", explode("|", $type)) && is_null($value->{$property->getName()})) {
+                        $property->setValue($objectInstance, $value->{$property->getName()});
+                    } else {
+                        $types = explode("|", $type);
+
+                        switch (reset($types)) {
+                            case "int":
+                            case "integer":
+                                $property->setValue($objectInstance, (int)$value->{$property->getName()});
+                                break;
+                            case "float":
+                            case "double":
+                                $property->setValue($objectInstance, (float)$value->{$property->getName()});
+                                break;
+                            case "string":
+                                $property->setValue($objectInstance, (string)$value->{$property->getName()});
+                                break;
+                            case "bool":
+                            case "boolean":
+                                $property->setValue($objectInstance, boolval($value->{$property->getName()}));
+                                break;
+                            case "datetime":
+                            case "\datetime":
+                                $property->setValue($objectInstance, new \DateTime($value->{$property->getName()}));
+                                break;
+                            default:
+                                $property->setValue($objectInstance, $value->{$property->getName()});
+                                break;
+                        }
+                    }
+                }
+
+                $data[$key] = $objectInstance;
+            }
         }
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
