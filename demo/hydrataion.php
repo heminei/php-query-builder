@@ -123,7 +123,7 @@ $query->select([
     "u.name",
     "u.createDate",
 ])->from("users", "u");
+$query->limit(10);
 
 $rows = $query->fetchObjects(User::class);
-
 var_dump($rows);

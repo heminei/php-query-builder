@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -   support hydration objects (auto cast types from annotations and property types). See `demo/hydrataion.php`
+-   added `enableResultCache` and `disableResultCache` methods
+-   deprecated `useResultCache` method
 
 ## [1.3.2] - 2021-02-10
 
