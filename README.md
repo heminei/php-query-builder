@@ -14,7 +14,7 @@ Powerfull and lightweight PHP SQL Query Builder with fluid interface SQL syntax 
 * auto escape column names
 * auto format queries
 * auto bind variables
-* hydration to objects (auto cast types from annotations and property types). See `demo/hydrataion.php`
+* hydration to objects (auto cast types from annotations and property types). See `demo/hydration.php`
 
 ## Quick install
 
