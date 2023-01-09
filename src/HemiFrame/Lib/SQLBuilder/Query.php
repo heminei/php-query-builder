@@ -7,7 +7,7 @@ namespace HemiFrame\Lib\SQLBuilder;
  */
 class Query
 {
-    const DEFAULT_VALUE = "f056c6dc7b3fc49ea4655853bea9b1d4e637a52d3d4a582985175f513fb9589241e21657f686e633c36760416031546cfe283d9961b9ac19aa2c45175dbbc9dd";
+    public const DEFAULT_VALUE = "f056c6dc7b3fc49ea4655853bea9b1d4e637a52d3d4a582985175f513fb9589241e21657f686e633c36760416031546cfe283d9961b9ac19aa2c45175dbbc9dd";
 
     /**
      * @var array
@@ -40,9 +40,9 @@ class Query
      *
      * @var array
      */
-    private $query = array(
+    private $query = [
         "type" => null,
-    );
+    ];
 
     /**
      *
@@ -406,8 +406,9 @@ class Query
     }
 
     /**
-     * @param string|null $hydrationClass
-     * @return array
+     * @template T
+     * @param class-string<T>|null $hydrationClass
+     * @return T[]|\stdClass[]
      */
     public function fetchObjects(?string $hydrationClass = null): array
     {
@@ -452,8 +453,9 @@ class Query
     }
 
     /**
-     * @param string|null $hydrationClass
-     * @return mixed
+     * @template T
+     * @param class-string<T>|null $hydrationClass
+     * @return T|\stdClass|null
      */
     public function fetchFirstObject(?string $hydrationClass = null)
     {
@@ -495,7 +497,6 @@ class Query
     }
 
     /**
-     *
      * @return array
      */
     public function fetchArrays(): array
@@ -672,10 +673,10 @@ class Query
         if (is_string($column)) {
             $column = trim($column);
             if ($value === self::DEFAULT_VALUE) {
-                $this->setColumns[] = array("column" => $column, "parameter" => false);
+                $this->setColumns[] = ["column" => $column, "parameter" => false];
             } else {
                 $parameterName = $this->generateParameterName($value);
-                $this->setColumns[] = array("column" => $column, "parameter" => ":" . $parameterName);
+                $this->setColumns[] = ["column" => $column, "parameter" => ":" . $parameterName];
             }
         } elseif (is_array($column)) {
             foreach ($column as $k => $v) {
@@ -856,7 +857,7 @@ class Query
     public function having(string $string): self
     {
         $this->havingConditions = [];
-        $this->havingConditions[] = array("operator" => "", "condition" => $string);
+        $this->havingConditions[] = ["operator" => "", "condition" => $string];
         return $this;
     }
 
@@ -1326,6 +1327,20 @@ class Query
     }
 
     /**
+     * Generate array of parameters from array values. All parameters is safety set with setVar method (bind).
+     * @param array $data
+     * @return string[] Example: [":param1", ":param2", ":param3"]
+     */
+    public function generateParametersFromArray(array $data): array
+    {
+        $parameters = [];
+        foreach ($data as $value) {
+            $parameters[] = ":" . $this->generateParameterName($value);
+        }
+        return $parameters;
+    }
+
+    /**
      *
      * @param mixed $column
      * @param mixed $value
@@ -1347,17 +1362,21 @@ class Query
                     $condition = $column . " IS NULL";
                 }
             } elseif (is_array($value)) {
-                $parameters = [];
-                foreach ($value as $v) {
-                    $parameterName = $this->generateParameterName($v);
-                    $parameters[] = ":" . $parameterName;
-                }
-                if ($operator == "!=") {
-                    $operator = "NOT IN";
+                if (count($value) > 0) {
+                    $parameters = [];
+                    foreach ($value as $v) {
+                        $parameterName = $this->generateParameterName($v);
+                        $parameters[] = ":" . $parameterName;
+                    }
+                    if ($operator == "!=") {
+                        $operator = "NOT IN";
+                    } else {
+                        $operator = "IN";
+                    }
+                    $condition = $column . " $operator (" . implode(",", $parameters) . ")";
                 } else {
-                    $operator = "IN";
+                    $condition = $column . " IS NULL";
                 }
-                $condition = $column . " $operator (" . implode(",", $parameters) . ")";
             } elseif ($value instanceof self) {
                 $this->subQueries[] = $value;
                 if ($operator == "!=") {

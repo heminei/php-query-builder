@@ -127,3 +127,6 @@ $query->limit(10);
 
 $rows = $query->fetchObjects(User::class);
 var_dump($rows);
+
+$row = $query->fetchFirstObject(User::class);
+var_dump($row);

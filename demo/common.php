@@ -17,6 +17,7 @@ $query->andWhere("u.status", 0);
 $query->andWhere("u.id", [1, 2, 3]);
 $query->andWhere("u.age", null);
 $query->andWhere("u.gender", null, '!=');
+$query->andWhere("(u.name IS NULL OR u.name IN (" . implode(",", $query->generateParametersFromArray(["John", "Marek", "Martin"])) ."))");
 $query->orderBy("u.id DESC");
 $query->groupBy("u.id");
 $query->paginationLimit(1, 10);
