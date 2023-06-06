@@ -419,7 +419,7 @@ class Query
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
                 if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
                     return $resultData->getData();
@@ -466,7 +466,7 @@ class Query
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
                 if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
                     return $resultData->getData();
@@ -508,7 +508,7 @@ class Query
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
                 if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
                     return $resultData->getData();
@@ -544,7 +544,7 @@ class Query
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
                 if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
                     return $resultData->getData();
@@ -579,7 +579,7 @@ class Query
 
         if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
                 if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
                     return $resultData->getData();
@@ -1354,40 +1354,68 @@ class Query
         if ($value === self::DEFAULT_VALUE) {
             $condition = $column;
         } else {
-            $column = $this->escapeString($column);
-            if (is_null($value)) {
-                if ($operator == "!=") {
-                    $condition = $column . " IS NOT NULL";
-                } else {
-                    $condition = $column . " IS NULL";
-                }
-            } elseif (is_array($value)) {
-                if (count($value) > 0) {
-                    $parameters = [];
-                    foreach ($value as $v) {
-                        $parameterName = $this->generateParameterName($v);
-                        $parameters[] = ":" . $parameterName;
+            switch ($operator) {
+                case 'fulltext':
+                    if(is_array($column)) {
+                        $column = implode(",", $column);
                     }
-                    if ($operator == "!=") {
-                        $operator = "NOT IN";
+                    if (is_array($value)) {
+                        if (count($value) > 0) {
+                            $parameters = [];
+                            foreach ($value as $v) {
+                                $parameterName = $this->generateParameterName($v);
+                                $parameters[] = ":" . $parameterName;
+                            }
+                            $condition = "MATCH($column) AGAINST(" . implode(",", $parameters) . ")";
+                        } else {
+                            $condition = "MATCH($column) AGAINST('')";
+                        }
                     } else {
-                        $operator = "IN";
+                        if(strstr(strtoupper($value), "WITH QUERY EXPANSION") || strstr(strtoupper($value), "IN BOOLEAN MODE")) {
+                            $condition = "MATCH($column) AGAINST($value)";
+                        } else {
+                            $parameterName = $this->generateParameterName($value);
+                            $condition = "MATCH($column) AGAINST(:$parameterName)";
+                        }
                     }
-                    $condition = $column . " $operator (" . implode(",", $parameters) . ")";
-                } else {
-                    $condition = $column . " IS NULL";
-                }
-            } elseif ($value instanceof self) {
-                $this->subQueries[] = $value;
-                if ($operator == "!=") {
-                    $operator = "NOT IN";
-                } else {
-                    $operator = "IN";
-                }
-                $condition = $column . " $operator ";
-            } else {
-                $parameterName = $this->generateParameterName($value);
-                $condition = $column . $operator . ":" . $parameterName;
+                    break;
+                default:
+                    $column = $this->escapeString($column);
+                    if (is_null($value)) {
+                        if ($operator == "!=") {
+                            $condition = $column . " IS NOT NULL";
+                        } else {
+                            $condition = $column . " IS NULL";
+                        }
+                    } elseif (is_array($value)) {
+                        if (count($value) > 0) {
+                            $parameters = [];
+                            foreach ($value as $v) {
+                                $parameterName = $this->generateParameterName($v);
+                                $parameters[] = ":" . $parameterName;
+                            }
+                            if ($operator == "!=") {
+                                $operator = "NOT IN";
+                            } else {
+                                $operator = "IN";
+                            }
+                            $condition = $column . " $operator (" . implode(",", $parameters) . ")";
+                        } else {
+                            $condition = $column . " IS NULL";
+                        }
+                    } elseif ($value instanceof self) {
+                        $this->subQueries[] = $value;
+                        if ($operator == "!=") {
+                            $operator = "NOT IN";
+                        } else {
+                            $operator = "IN";
+                        }
+                        $condition = $column . " $operator ";
+                    } else {
+                        $parameterName = $this->generateParameterName($value);
+                        $condition = $column . $operator . ":" . $parameterName;
+                    }
+                    break;
             }
         }
         $this->whereConditions[] = [
