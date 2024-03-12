@@ -4,24 +4,17 @@ namespace HemiFrame\Lib\SQLBuilder\Cache;
 
 class ResultData
 {
-    /**
-     * @var mixed
-     */
-    private $data = null;
+    private mixed $data;
 
-    /**
-     * @return mixed
-     */
-    public function getData()
+    public function getData(): mixed
     {
         return $this->data;
     }
 
     /**
-     * @param mixed $data
      * @return $this
      */
-    public function setData($data)
+    public function setData(mixed $data): self
     {
         $this->data = $data;
 

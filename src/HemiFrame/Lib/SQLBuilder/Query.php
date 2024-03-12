@@ -7,138 +7,113 @@ namespace HemiFrame\Lib\SQLBuilder;
  */
 class Query
 {
-    public const DEFAULT_VALUE = "f056c6dc7b3fc49ea4655853bea9b1d4e637a52d3d4a582985175f513fb9589241e21657f686e633c36760416031546cfe283d9961b9ac19aa2c45175dbbc9dd";
+    public const DEFAULT_VALUE = 'f056c6dc7b3fc49ea4655853bea9b1d4e637a52d3d4a582985175f513fb9589241e21657f686e633c36760416031546cfe283d9961b9ac19aa2c45175dbbc9dd';
 
     /**
      * @var array
      */
     public static $global = [
-        "pdo" => null,
-        "logs" => [
-            "errors" => null,
+        'pdo' => null,
+        'logs' => [
+            'errors' => null,
         ],
-        "executedQueries" => [],
-        "resultCache" => [
-            "implementation" => null,
-            "prefix" => "query-result-cache",
+        'executedQueries' => [],
+        'resultCache' => [
+            'implementation' => null,
+            'prefix' => 'query-result-cache',
         ],
     ];
 
     /**
-     *
      * @var array
      */
     private $config = [];
 
     /**
-     *
      * @var \PDO|null
      */
-    private $pdo = null;
+    private $pdo;
 
     /**
-     *
      * @var array
      */
     private $query = [
-        "type" => null,
+        'type' => null,
     ];
 
     /**
-     *
      * @var array
      */
     private $subQueries = [];
 
     /**
-     *
      * @var float
      */
     private $executionTime = 0;
 
-    /**
-     *
-     * @var array
-     */
-    private $vars = [];
+    private array $vars = [];
+
+    private mixed $tables;
 
     /**
-     *
-     * @var mixed
-     */
-    private $tables = null;
-
-    /**
-     *
      * @var array
      */
     private $columns = [];
 
     /**
-     *
      * @var array
      */
     private $joinTables = [];
 
     /**
-     *
      * @var array
      */
     private $whereConditions = [];
 
     /**
-     *
      * @var array
      */
     private $havingConditions = [];
 
     /**
-     *
      * @var array
      */
     private $groupByColumns = [];
 
     /**
-     *
      * @var array
      */
     private $orderByColumns = [];
 
     /**
-     *
      * @var array
      */
     private $setColumns = [];
 
     /**
-     *
      * @var array
      */
     private $values = [];
 
     /**
-     *
      * @var string|int
      */
-    private $limit = null;
+    private $limit;
 
     /**
-     *
      * @var string
      */
-    private $onDuplicateKeyUpdate = null;
+    private $onDuplicateKeyUpdate;
 
     /**
-     *
      * @var array
      */
     private $unions = [];
 
     /**
-     *
      * @var string|null
      */
-    private $plainQueryString = null;
+    private $plainQueryString;
 
     /**
      * @var bool
@@ -148,7 +123,7 @@ class Query
     /**
      * @var \Psr\SimpleCache\CacheInterface|null
      */
-    private $resultCacheImplementation = null;
+    private $resultCacheImplementation;
 
     /**
      * @var int
@@ -158,7 +133,7 @@ class Query
     /**
      * @var string|null
      */
-    private $resultCacheKey = null;
+    private $resultCacheKey;
 
     public function __construct(array $config = [])
     {
@@ -177,46 +152,35 @@ class Query
     }
 
     /**
-     * Set PDO object
-     * @param \PDO $pdo
+     * Set PDO object.
+     *
      * @throws QueryException
-     * @return self
      */
     public function setPdo(\PDO $pdo): self
     {
         if (!$pdo instanceof \PDO) {
-            throw new QueryException("Set PDO object");
+            throw new QueryException('Set PDO object');
         }
         $this->pdo = $pdo;
 
         return $this;
     }
 
-    /**
-     *
-     * @return \PDO|null
-     */
     public function getPdo(): ?\PDO
     {
         return $this->pdo;
     }
 
-    /**
-     *
-     * @param string $name
-     * @param mixed $value
-     * @return self
-     */
-    public function setVar(string $name, $value): self
+    public function setVar(string $name, mixed $value): self
     {
         if (empty($name)) {
-            throw new QueryException("Enter var name");
+            throw new QueryException('Enter var name');
         }
         if (!is_string($name)) {
-            throw new QueryException("Var name must be string");
+            throw new QueryException('Var name must be string');
         }
         if ($value instanceof \DateTime) {
-            $value = $value->format("Y-m-d H:i:s");
+            $value = $value->format('Y-m-d H:i:s');
         }
 
         $this->vars[$name] = $value;
@@ -224,35 +188,23 @@ class Query
         return $this;
     }
 
-    /**
-     *
-     * @param array $array
-     * @return self
-     */
     public function setVars(array $array): self
     {
         if (!is_array($array)) {
-            throw new QueryException("Invalid array");
+            throw new QueryException('Invalid array');
         }
         foreach ($array as $key => $value) {
             $this->setVar($key, $value);
         }
+
         return $this;
     }
 
-    /**
-     *
-     * @return array
-     */
     public function getValues(): array
     {
         return $this->values;
     }
 
-    /**
-     *
-     * @return array
-     */
     public function getVars(): array
     {
         $vars = [];
@@ -265,44 +217,29 @@ class Query
         foreach ($this->vars as $name => $var) {
             $vars[$name] = $var;
         }
+
         return $vars;
     }
 
-    /**
-     *
-     * @return array
-     */
     public function getSubQueries(): array
     {
         return $this->subQueries;
     }
 
-    /**
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function getVar(string $name)
+    public function getVar(string $name): mixed
     {
         if (isset($this->vars[$name])) {
             return $this->vars[$name];
         }
+
         return null;
     }
 
-    /**
-     *
-     * @return float
-     */
     public function getExecutionTime(): float
     {
         return $this->executionTime;
     }
 
-    /**
-     *
-     * @return string
-     */
     public function getLastInsertId(): string
     {
         return $this->pdo->lastInsertId();
@@ -311,7 +248,6 @@ class Query
     /**
      * Initiates a transaction
      * Returns TRUE on success or FALSE on failure.
-     * @return bool
      */
     public function beginTransaction(): bool
     {
@@ -321,7 +257,6 @@ class Query
     /**
      * Commits a transaction
      * Returns TRUE on success or FALSE on failure.
-     * @return bool
      */
     public function commit(): bool
     {
@@ -331,7 +266,6 @@ class Query
     /**
      * Rolls back a transaction
      * Returns TRUE on success or FALSE on failure.
-     * @return bool
      */
     public function rollBack(): bool
     {
@@ -339,8 +273,7 @@ class Query
     }
 
     /**
-     * Checks if inside a transaction
-     * @return bool
+     * Checks if inside a transaction.
      */
     public function inTransaction(): bool
     {
@@ -348,9 +281,7 @@ class Query
     }
 
     /**
-     * Prepares a statement for execution and returns a statement object
-     * @param string $query
-     * @return \PDOStatement
+     * Prepares a statement for execution and returns a statement object.
      */
     public function prepare(string $query): \PDOStatement
     {
@@ -358,8 +289,6 @@ class Query
     }
 
     /**
-     *
-     * @return \PDOStatement
      * @throws QueryException
      */
     public function execute(): \PDOStatement
@@ -368,18 +297,18 @@ class Query
 
         $PDOStatement = $this->prepare($this->getQueryString());
 
-        /**
+        /*
          * bind vars
          */
         foreach ($this->getVars() as $key => $value) {
             if (is_int($value)) {
-                $PDOStatement->bindValue(":" . $key, $value, \PDO::PARAM_INT);
+                $PDOStatement->bindValue(':'.$key, $value, \PDO::PARAM_INT);
             } elseif (is_null($value)) {
-                $PDOStatement->bindValue(":" . $key, $value, \PDO::PARAM_NULL);
+                $PDOStatement->bindValue(':'.$key, $value, \PDO::PARAM_NULL);
             } elseif (is_bool($value)) {
-                $PDOStatement->bindValue(":" . $key, $value, \PDO::PARAM_BOOL);
+                $PDOStatement->bindValue(':'.$key, $value, \PDO::PARAM_BOOL);
             } else {
-                $PDOStatement->bindValue(":" . $key, $value, \PDO::PARAM_STR);
+                $PDOStatement->bindValue(':'.$key, $value, \PDO::PARAM_STR);
             }
         }
 
@@ -388,18 +317,18 @@ class Query
 
         $error = $PDOStatement->errorInfo();
         if (!empty($error[2])) {
-            if (!empty($this->config['logs']["errors"])) {
-                $fileErrors = fopen($this->config['logs']["errors"], "a+");
-                $text = $error[2] . " - " . $this->getQueryString() . "\n\n";
+            if (!empty($this->config['logs']['errors'])) {
+                $fileErrors = fopen($this->config['logs']['errors'], 'a+');
+                $text = $error[2].' - '.$this->getQueryString()."\n\n";
                 fwrite($fileErrors, $text);
                 fclose($fileErrors);
             }
-            throw new QueryException($error[2] . " ==> " . $this->getQueryString());
+            throw new QueryException($error[2].' ==> '.$this->getQueryString());
         }
 
         self::$global['executedQueries'][] = [
-            "query" => $this->getQueryString(),
-            "time" => $this->getExecutionTime(),
+            'query' => $this->getQueryString(),
+            'time' => $this->getExecutionTime(),
         ];
 
         return $PDOStatement;
@@ -407,21 +336,23 @@ class Query
 
     /**
      * @template T
+     *
      * @param class-string<T>|null $hydrationClass
+     *
      * @return T[]|\stdClass[]
      */
-    public function fetchObjects(?string $hydrationClass = null): array
+    public function fetchObjects(?string $hydrationClass = \stdClass::class): array
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
+            $cacheKey = $this->config['resultCache']['prefix'].'-'.__METHOD__.'-'.md5($this->getQueryString(true));
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
-                if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
+                if (!empty($resultData) && is_a($resultData, Cache\ResultData::class)) {
                     return $resultData->getData();
                 }
             }
@@ -443,8 +374,8 @@ class Query
             }
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
+            $resultData = new Cache\ResultData();
             $resultData->setData($data);
             $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
@@ -454,28 +385,30 @@ class Query
 
     /**
      * @template T
+     *
      * @param class-string<T>|null $hydrationClass
+     *
      * @return T|\stdClass|null
      */
     public function fetchFirstObject(?string $hydrationClass = null)
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
+            $cacheKey = $this->config['resultCache']['prefix'].'-'.__METHOD__.'-'.md5($this->getQueryString(true));
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
-                if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
+                if (!empty($resultData) && is_a($resultData, Cache\ResultData::class)) {
                     return $resultData->getData();
                 }
             }
         }
 
         $data = $this->execute()->fetchObject();
-        if (!is_object($data) && $data !== null) {
+        if (!is_object($data) && null !== $data) {
             $data = null;
         }
 
@@ -487,8 +420,8 @@ class Query
             $data = $this->hydrateClass($reflectionClass, $data);
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
+            $resultData = new Cache\ResultData();
             $resultData->setData($data);
             $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
@@ -496,19 +429,16 @@ class Query
         return $data;
     }
 
-    /**
-     * @return array
-     */
     public function fetchArrays(): array
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
+            $cacheKey = $this->config['resultCache']['prefix'].'-'.__METHOD__.'-'.md5($this->getQueryString(true));
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
                 if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
                     return $resultData->getData();
@@ -521,8 +451,8 @@ class Query
             $data = [];
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
+            $resultData = new Cache\ResultData();
             $resultData->setData($data);
             $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
@@ -531,20 +461,18 @@ class Query
     }
 
     /**
-     *
-     * @return array
      * @throws QueryException
      */
     public function fetchColumn(): array
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
+            $cacheKey = $this->config['resultCache']['prefix'].'-'.__METHOD__.'-'.md5($this->getQueryString(true));
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
                 if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
                     return $resultData->getData();
@@ -557,8 +485,8 @@ class Query
             $data = [];
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
+            $resultData = new Cache\ResultData();
             $resultData->setData($data);
             $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
@@ -566,34 +494,30 @@ class Query
         return $data;
     }
 
-    /**
-     *
-     * @return mixed
-     */
-    public function fetchFirstArray()
+    public function fetchFirstArray(): ?array
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
-            $cacheKey = $this->config['resultCache']['prefix'] . "-" . __METHOD__ . "-" . md5($this->getQueryString(true));
+            $cacheKey = $this->config['resultCache']['prefix'].'-'.__METHOD__.'-'.md5($this->getQueryString(true));
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
             if ($this->resultCacheImplementation->has($cacheKey)) {
-                /** @var \HemiFrame\Lib\SQLBuilder\Cache\ResultData $resultData */
+                /** @var Cache\ResultData|null $resultData */
                 $resultData = $this->resultCacheImplementation->get($cacheKey);
-                if (!empty($resultData) && is_a($resultData, 'HemiFrame\Lib\SQLBuilder\Cache\ResultData')) {
+                if (!empty($resultData) && is_a($resultData, Cache\ResultData::class)) {
                     return $resultData->getData();
                 }
             }
         }
 
         $data = $this->execute()->fetch(\PDO::FETCH_ASSOC);
-        if (!is_array($data) && $data !== null) {
+        if (!is_array($data) && null !== $data) {
             $data = null;
         }
 
-        if ($this->useResultCache == true && $this->resultCacheLifeTime > 0) {
-            $resultData = new \HemiFrame\Lib\SQLBuilder\Cache\ResultData();
+        if (true == $this->useResultCache && $this->resultCacheLifeTime > 0) {
+            $resultData = new Cache\ResultData();
             $resultData->setData($data);
             $this->resultCacheImplementation->set($cacheKey, $resultData, $this->resultCacheLifeTime);
         }
@@ -601,82 +525,60 @@ class Query
         return $data;
     }
 
-    /**
-     *
-     * @return int
-     */
     public function rowCount(): int
     {
         return $this->execute()->rowCount();
     }
 
-    /**
-     *
-     * @param mixed $tables
-     * @return self
-     */
-    public function insertInto($tables): self
+    public function insertInto(mixed $tables): self
     {
-        $this->setQueryType("insertInto");
+        $this->setQueryType('insertInto');
         $this->setTables($tables);
+
         return $this;
     }
 
-    /**
-     *
-     * @param mixed $tables
-     * @return self
-     */
-    public function insertIgnore($tables): self
+    public function insertIgnore(mixed $tables): self
     {
-        $this->setQueryType("insertIgnore");
+        $this->setQueryType('insertIgnore');
         $this->setTables($tables);
+
         return $this;
     }
 
-    /**
-     *
-     * @param mixed $tables
-     * @return self
-     */
-    public function insertDelayed($tables): self
+    public function insertDelayed(mixed $tables): self
     {
-        $this->setQueryType("insertDelayed");
+        $this->setQueryType('insertDelayed');
         $this->setTables($tables);
+
         return $this;
     }
 
-    /**
-     *
-     * @param mixed $columns
-     * @return self
-     */
-    public function select($columns = "*"): self
+    public function select(mixed $columns = '*'): self
     {
-        $this->setQueryType("select");
+        $this->setQueryType('select');
         if (is_string($columns)) {
-            $arrayColumns = explode(",", $columns);
+            $arrayColumns = explode(',', $columns);
             $this->columns = array_merge($this->columns, $arrayColumns);
         } elseif (is_array($columns)) {
             $this->columns = array_merge($this->columns, $columns);
         }
+
         return $this;
     }
 
     /**
      * @param string|array $column
-     * @param mixed $value
-     * @return self
      */
-    public function set($column, $value = self::DEFAULT_VALUE): self
+    public function set(mixed $column, mixed $value = self::DEFAULT_VALUE): self
     {
         if (is_string($column)) {
             $column = trim($column);
-            if ($value === self::DEFAULT_VALUE) {
-                $this->setColumns[] = ["column" => $column, "parameter" => false];
+            if (self::DEFAULT_VALUE === $value) {
+                $this->setColumns[] = ['column' => $column, 'parameter' => false];
             } else {
                 $parameterName = $this->generateParameterName($value);
-                $this->setColumns[] = ["column" => $column, "parameter" => ":" . $parameterName];
+                $this->setColumns[] = ['column' => $column, 'parameter' => ':'.$parameterName];
             }
         } elseif (is_array($column)) {
             foreach ($column as $k => $v) {
@@ -688,41 +590,40 @@ class Query
     }
 
     /**
-     *
-     * @param mixed $columns
-     * @param array $values
-     * @return self
+     * @param string|array $values
      */
-    public function values($columns, $values): self
+    public function values(mixed $columns, $values): self
     {
         if (is_string($columns)) {
-            $this->values["columns"] = explode(",", $columns);
+            $this->values['columns'] = explode(',', $columns);
         } elseif (is_array($columns)) {
-            $this->values["columns"] = $columns;
+            $this->values['columns'] = $columns;
         }
 
-        if (empty($this->values["columns"])) {
-            throw new QueryException("Columns are empty");
+        if (empty($this->values['columns'])) {
+            throw new QueryException('Columns are empty');
         }
         if (empty($values)) {
-            throw new QueryException("Values are empty");
+            throw new QueryException('Values are empty');
         }
         if (!is_array($values)) {
-            throw new QueryException("Values is not array");
+            throw new QueryException('Values is not array');
         }
 
-        $this->values["columns"] = array_map(function ($item) {
-            if (!strstr($item, "`") && !strstr($item, ".")) {
+        $this->values['columns'] = array_map(function ($item) {
+            if (!strstr($item, '`') && !strstr($item, '.')) {
                 $item = "`$item`";
             }
-            return $item;
-        }, $this->values["columns"]);
 
-        $this->values["values"] = array_map(function ($row) {
+            return $item;
+        }, $this->values['columns']);
+
+        $this->values['values'] = array_map(function ($row) {
             foreach ($row as $keyValue => $value) {
                 $parameterName = $this->generateParameterName($value);
-                $row[$keyValue] = ":" . $parameterName;
+                $row[$keyValue] = ':'.$parameterName;
             }
+
             return $row;
         }, $values);
 
@@ -730,25 +631,19 @@ class Query
     }
 
     /**
-     *
-     * @param mixed $table
-     * @param string $alias
      * @return $this
      */
-    public function update($table, $alias = ""): self
+    public function update(mixed $table, string $alias = ''): self
     {
         if (empty($table)) {
-            throw new QueryException("Enter table name");
+            throw new QueryException('Enter table name');
         }
         $this->setTables($table, $alias);
-        $this->setQueryType("update");
+        $this->setQueryType('update');
+
         return $this;
     }
 
-    /**
-     * @param string $string
-     * @return self
-     */
     public function onDuplicateKeyUpdate(string $string): self
     {
         $this->onDuplicateKeyUpdate = $string;
@@ -757,211 +652,174 @@ class Query
     }
 
     /**
-     * @param mixed $table
      * @return $this
      */
-    public function delete($table = null): self
+    public function delete(mixed $table = null): self
     {
-        $this->setQueryType("delete");
+        $this->setQueryType('delete');
         if (is_string($table)) {
-            $arrayColumns = explode(",", $table);
+            $arrayColumns = explode(',', $table);
             $this->columns = array_merge($this->columns, $arrayColumns);
         } elseif (is_array($table)) {
             $this->columns = array_merge($this->columns, $table);
         }
+
         return $this;
     }
 
     /**
-     *
-     * @param mixed $table
-     * @param string $alias
      * @return $this
      */
-    public function from($table, $alias = ""): self
+    public function from(mixed $table, string $alias = ''): self
     {
         if (empty($table)) {
-            throw new QueryException("Enter table name");
+            throw new QueryException('Enter table name');
         }
         $this->setTables($table, $alias);
+
         return $this;
     }
 
     /**
-     *
-     * @param mixed $table
-     * @param string $alias
-     * @param string $relation
      * @return $this
      */
-    public function leftJoin($table, $alias, $relation): self
+    public function leftJoin(mixed $table, string $alias, string $relation): self
     {
-        $this->setJoinTable("LEFT JOIN", $table, $alias, $relation);
+        $this->setJoinTable('LEFT JOIN', $table, $alias, $relation);
+
         return $this;
     }
 
     /**
-     *
-     * @param mixed $table
-     * @param string $alias
-     * @param string $relation
      * @return $this
      */
-    public function rightJoin($table, $alias, $relation): self
+    public function rightJoin(mixed $table, string $alias, string $relation): self
     {
-        $this->setJoinTable("RIGHT JOIN", $table, $alias, $relation);
+        $this->setJoinTable('RIGHT JOIN', $table, $alias, $relation);
+
         return $this;
     }
 
     /**
-     *
-     * @param mixed $table
-     * @param string $alias
-     * @param string $relation
      * @return $this
      */
-    public function innerJoin($table, $alias, $relation): self
+    public function innerJoin(mixed $table, string $alias, string $relation): self
     {
-        $this->setJoinTable("INNER JOIN", $table, $alias, $relation);
+        $this->setJoinTable('INNER JOIN', $table, $alias, $relation);
+
         return $this;
     }
 
     /**
-     *
-     * @param mixed $table
-     * @param string $alias
-     * @param string $relation
      * @return $this
      */
-    public function straightJoin($table, $alias, $relation): self
+    public function straightJoin(mixed $table, string $alias, string $relation): self
     {
-        $this->setJoinTable("STRAIGHT_JOIN", $table, $alias, $relation);
+        $this->setJoinTable('STRAIGHT_JOIN', $table, $alias, $relation);
+
         return $this;
     }
 
-    /**
-     * @param string $column
-     * @param mixed $value
-     * @param string $operator
-     * @return self
-     */
-    public function where(string $column, $value = self::DEFAULT_VALUE, string $operator = "="): self
+    public function where(string $column, mixed $value = self::DEFAULT_VALUE, string $operator = '='): self
     {
         return $this->setWhereCondition($column, $value, $operator);
     }
 
-    /**
-     * @param string $string
-     * @return self
-     */
     public function having(string $string): self
     {
         $this->havingConditions = [];
-        $this->havingConditions[] = ["operator" => "", "condition" => $string];
+        $this->havingConditions[] = ['operator' => '', 'condition' => $string];
+
         return $this;
     }
 
-    /**
-     * @param string $column
-     * @param mixed $value
-     * @param string $operator
-     * @return self
-     */
-    public function andWhere(string $column, $value = self::DEFAULT_VALUE, string $operator = "="): self
+    public function andWhere(string $column, mixed $value = self::DEFAULT_VALUE, string $operator = '='): self
     {
-        return $this->setWhereCondition($column, $value, $operator, "AND");
+        return $this->setWhereCondition($column, $value, $operator, 'AND');
+    }
+
+    public function orWhere(string $column, mixed $value = self::DEFAULT_VALUE, string $operator = '='): self
+    {
+        return $this->setWhereCondition($column, $value, $operator, 'OR');
     }
 
     /**
-     * @param string $column
-     * @param mixed $value
-     * @param string $operator
-     * @return self
-     */
-    public function orWhere(string $column, $value = self::DEFAULT_VALUE, string $operator = "="): self
-    {
-        return $this->setWhereCondition($column, $value, $operator, "OR");
-    }
-
-    /**
-     * @param mixed $columns
      * @return $this
      */
-    public function groupBy($columns): self
+    public function groupBy(mixed $columns): self
     {
         if (is_string($columns)) {
-            $arrayColumns = explode(",", $columns);
+            $arrayColumns = explode(',', $columns);
             $this->groupByColumns = array_merge($this->groupByColumns, $arrayColumns);
         } elseif (is_array($columns)) {
             $this->groupByColumns = array_merge($this->groupByColumns, $columns);
         }
+
         return $this;
     }
 
     /**
-     *
-     * @param mixed $columns
      * @return $this
      */
-    public function orderBy($columns): self
+    public function orderBy(mixed $columns): self
     {
         if (is_string($columns)) {
-            $arrayColumns = explode(",", $columns);
+            $arrayColumns = explode(',', $columns);
             $this->orderByColumns = array_merge($this->orderByColumns, $arrayColumns);
         } elseif (is_array($columns)) {
             $this->orderByColumns = array_merge($this->orderByColumns, $columns);
         }
+
         return $this;
     }
 
     /**
-     *
      * @param string|self $query
+     *
      * @return $this
      */
     public function unionAll($query)
     {
         if (is_string($query)) {
             $this->unions[] = [
-                "type" => "ALL",
-                "query" => $query,
+                'type' => 'ALL',
+                'query' => $query,
             ];
         } elseif ($query instanceof self) {
             $this->subQueries[] = $query;
             $this->unions[] = [
-                "type" => "ALL",
-                "query" => $query,
+                'type' => 'ALL',
+                'query' => $query,
             ];
         }
+
         return $this;
     }
 
     /**
      * @param string|int $limit
+     *
      * @return $this
      */
     public function limit($limit): self
     {
         $this->limit = $limit;
+
         return $this;
     }
 
     /**
-     *
-     * @param int $page
-     * @param int $itemsPerPage
      * @return $this
      */
     public function paginationLimit(int $page = 1, int $itemsPerPage = 10): self
     {
         $offset = ($page - 1) * $itemsPerPage;
         $this->limit("$offset, $itemsPerPage");
+
         return $this;
     }
 
     /**
-     *
-     * @param string $query
      * @return $this
      */
     public function setQueryString(string $query): self
@@ -974,279 +832,279 @@ class Query
     public function getQueryString(bool $replaceParameters = false): string
     {
         $newLine = PHP_EOL;
-        $tab = "  ";
-        if ($this->plainQueryString !== null) {
+        $tab = '  ';
+        if (null !== $this->plainQueryString) {
             $queryString = $this->plainQueryString;
         } else {
-            if ($this->getQueryType() === null) {
-                throw new QueryException("Set query type (insertInto, insertIgnore, insertDelayed, select, update, delete)");
+            if (null === $this->getQueryType()) {
+                throw new QueryException('Set query type (insertInto, insertIgnore, insertDelayed, select, update, delete)');
             }
 
             if ($this->tables instanceof self) {
-                $this->tables = ["(" . $this->tables->getQueryString() . ")"];
+                $this->tables = ['('.$this->tables->getQueryString().')'];
             }
 
-            $queryString = "";
+            $queryString = '';
 
             switch ($this->getQueryType()) {
-                case "insertInto":
-                case "insertIgnore":
-                case "insertDelayed":
-                    if ($this->getQueryType() == "insertInto") {
-                        $queryString .= "INSERT INTO" . $newLine;
-                    } elseif ($this->getQueryType() == "insertIgnore") {
-                        $queryString .= "INSERT IGNORE" . $newLine;
-                    } elseif ($this->getQueryType() == "insertDelayed") {
-                        $queryString .= "INSERT DELAYED" . $newLine;
+                case 'insertInto':
+                case 'insertIgnore':
+                case 'insertDelayed':
+                    if ('insertInto' == $this->getQueryType()) {
+                        $queryString .= 'INSERT INTO'.$newLine;
+                    } elseif ('insertIgnore' == $this->getQueryType()) {
+                        $queryString .= 'INSERT IGNORE'.$newLine;
+                    } elseif ('insertDelayed' == $this->getQueryType()) {
+                        $queryString .= 'INSERT DELAYED'.$newLine;
                     }
 
-                    /**
+                    /*
                      * Parse tables
                      */
                     $queryString .= $this->parseTables($newLine, $tab);
 
                     if (!empty($this->setColumns) && !empty($this->values)) {
-                        throw new QueryException("Use only SET or VALUES");
+                        throw new QueryException('Use only SET or VALUES');
                     }
 
                     if (!empty($this->setColumns)) {
                         /**
-                         * ADD SET COLUMNS
+                         * ADD SET COLUMNS.
                          */
                         $setColumns = array_map(function ($array) use ($newLine) {
-                            $column = $array["column"];
-                            $parameter = $array["parameter"];
-                            if ($parameter === false) {
-                                return $column . $newLine;
+                            $column = $array['column'];
+                            $parameter = $array['parameter'];
+                            if (false === $parameter) {
+                                return $column.$newLine;
                             } else {
-                                return "`" . $column . "`=$parameter" . $newLine;
+                                return '`'.$column."`=$parameter".$newLine;
                             }
                         }, $this->setColumns);
-                        $queryString .= "SET" . $newLine . $tab . implode("$tab,", $setColumns);
+                        $queryString .= 'SET'.$newLine.$tab.implode("$tab,", $setColumns);
                     }
                     if (!empty($this->values)) {
-                        /**
+                        /*
                          * ADD VALUES COLUMNS
                          */
-                        $queryString .= $tab . "(" . implode(",", $this->values['columns']) . ")" . $newLine;
+                        $queryString .= $tab.'('.implode(',', $this->values['columns']).')'.$newLine;
 
                         $values = array_map(function ($array) use ($newLine) {
-                            return "(" . implode(",", $array) . ")" . $newLine;
+                            return '('.implode(',', $array).')'.$newLine;
                         }, $this->values['values']);
-                        $queryString .= "VALUES" . $newLine . $tab . implode("$tab,", $values);
+                        $queryString .= 'VALUES'.$newLine.$tab.implode("$tab,", $values);
                     }
 
-                    if ($this->onDuplicateKeyUpdate !== null) {
-                        $queryString .= "ON DUPLICATE KEY UPDATE " . $newLine . $tab . $this->onDuplicateKeyUpdate . $newLine;
+                    if (null !== $this->onDuplicateKeyUpdate) {
+                        $queryString .= 'ON DUPLICATE KEY UPDATE '.$newLine.$tab.$this->onDuplicateKeyUpdate.$newLine;
                     }
 
                     break;
-                case "select":
-                    $queryString .= "SELECT " . $newLine;
+                case 'select':
+                    $queryString .= 'SELECT '.$newLine;
 
                     /**
-                     * ADD SELECTED COLUMNS
+                     * ADD SELECTED COLUMNS.
                      */
                     $columns = array_map(function ($column) use ($newLine) {
-                        return trim($column) . $newLine;
+                        return trim($column).$newLine;
                     }, $this->columns);
-                    $queryString .= $tab . implode("$tab,", $columns);
+                    $queryString .= $tab.implode("$tab,", $columns);
 
-                    $queryString .= "FROM" . $newLine;
+                    $queryString .= 'FROM'.$newLine;
 
-                    /**
+                    /*
                      * Parse tables
                      */
                     $queryString .= $this->parseTables($newLine, $tab);
 
-                    /**
+                    /*
                      * ADD JOIN TABLES
                      */
                     foreach ($this->joinTables as $joinTable) {
                         if ($joinTable['table'] instanceof self) {
-                            $joinTable['table'] = "(" . $joinTable['table']->getQueryString() . ")";
+                            $joinTable['table'] = '('.$joinTable['table']->getQueryString().')';
                         }
                         if (!empty($joinTable['alias'])) {
-                            $joinTable['alias'] = " AS " . $joinTable['alias'];
+                            $joinTable['alias'] = ' AS '.$joinTable['alias'];
                         }
-                        $queryString .= trim($joinTable['type'] . ' ' . $joinTable['table'] . $joinTable['alias'] . $newLine . $tab . "ON " . $joinTable['relation']) . " " . $newLine;
+                        $queryString .= trim($joinTable['type'].' '.$joinTable['table'].$joinTable['alias'].$newLine.$tab.'ON '.$joinTable['relation']).' '.$newLine;
                     }
 
-                    /**
+                    /*
                      * PARSE WHERE CONDITIONS
                      */
                     $queryString .= $this->parseWhereConditions($newLine, $tab);
 
-                    /**
+                    /*
                      * GROUP BY
                      */
                     if (count($this->groupByColumns) > 0) {
-                        $queryString .= "GROUP BY " . implode(",", $this->groupByColumns) . $newLine;
+                        $queryString .= 'GROUP BY '.implode(',', $this->groupByColumns).$newLine;
                     }
 
-                    /**
+                    /*
                      * HAVING CONDITIONS
                      */
                     if (count($this->havingConditions) > 0) {
-                        $havingConditions = "HAVING" . $newLine;
+                        $havingConditions = 'HAVING'.$newLine;
                         $i = 1;
                         foreach ($this->havingConditions as $value) {
-                            if ($i == 1) {
-                                $havingConditions .= $tab . $value['condition'] . $newLine;
+                            if (1 == $i) {
+                                $havingConditions .= $tab.$value['condition'].$newLine;
                             } else {
-                                $havingConditions .= $tab . $value['operator'] . " " . $value['condition'] . $newLine;
+                                $havingConditions .= $tab.$value['operator'].' '.$value['condition'].$newLine;
                             }
-                            $i++;
+                            ++$i;
                         }
                         $queryString .= $havingConditions;
                     }
 
-                    /**
+                    /*
                      * ORDER BY
                      */
                     if (count($this->orderByColumns) > 0) {
-                        $queryString .= "ORDER BY " . implode(",", $this->orderByColumns) . $newLine;
+                        $queryString .= 'ORDER BY '.implode(',', $this->orderByColumns).$newLine;
                     }
 
-                    /**
+                    /*
                      * LIMIT
                      */
-                    if ($this->limit !== null) {
-                        $queryString .= "LIMIT " . $this->limit . $newLine;
+                    if (null !== $this->limit) {
+                        $queryString .= 'LIMIT '.$this->limit.$newLine;
                     }
 
-                    /**
+                    /*
                      * UNION
                      */
                     foreach ($this->unions as $key => $value) {
                         if ($value['query'] instanceof self) {
                             $value['query'] = $value['query']->getQueryString();
                         }
-                        $queryString .= "UNION" . $newLine . $value['type'] . " " . $value['query'] . " " . $newLine;
+                        $queryString .= 'UNION'.$newLine.$value['type'].' '.$value['query'].' '.$newLine;
                     }
 
                     break;
-                case "update":
-                    $queryString .= "UPDATE" . $newLine;
+                case 'update':
+                    $queryString .= 'UPDATE'.$newLine;
 
-                    /**
+                    /*
                      * Parse tables
                      */
                     $queryString .= $this->parseTables($newLine, $tab);
 
-                    /**
+                    /*
                      * ADD JOIN TABLES
                      */
                     foreach ($this->joinTables as $joinTable) {
                         if ($joinTable['table'] instanceof self) {
-                            $joinTable['table'] = "(" . $joinTable['table']->getQueryString() . ")";
+                            $joinTable['table'] = '('.$joinTable['table']->getQueryString().')';
                         }
                         if (!empty($joinTable['alias'])) {
-                            $joinTable['alias'] = " AS " . $joinTable['alias'];
+                            $joinTable['alias'] = ' AS '.$joinTable['alias'];
                         }
-                        $queryString .= trim($joinTable['type'] . ' ' . $joinTable['table'] . $joinTable['alias'] . $newLine . $tab . "ON " . $joinTable['relation']) . " " . $newLine;
+                        $queryString .= trim($joinTable['type'].' '.$joinTable['table'].$joinTable['alias'].$newLine.$tab.'ON '.$joinTable['relation']).' '.$newLine;
                     }
 
                     /**
-                     * ADD SET COLUMNS
+                     * ADD SET COLUMNS.
                      */
                     $setColumns = array_map(function ($array) use ($newLine) {
-                        $column = $this->escapeString($array["column"]);
-                        $parameter = $array["parameter"];
-                        if ($parameter === false) {
-                            return $column . $newLine;
+                        $column = $this->escapeString($array['column']);
+                        $parameter = $array['parameter'];
+                        if (false === $parameter) {
+                            return $column.$newLine;
                         } else {
-                            return $column . "=$parameter" . $newLine;
+                            return $column."=$parameter".$newLine;
                         }
                     }, $this->setColumns);
-                    $queryString .= "SET" . $newLine . $tab . implode("$tab,", $setColumns);
+                    $queryString .= 'SET'.$newLine.$tab.implode("$tab,", $setColumns);
 
-                    /**
+                    /*
                      * PARSE WHERE CONDITIONS
                      */
                     $queryString .= $this->parseWhereConditions($newLine, $tab);
 
-                    /**
+                    /*
                      * ORDER BY
                      */
                     if (count($this->orderByColumns) > 0) {
-                        $queryString .= "ORDER BY " . implode(",", $this->orderByColumns) . $newLine;
+                        $queryString .= 'ORDER BY '.implode(',', $this->orderByColumns).$newLine;
                     }
 
-                    /**
+                    /*
                      * LIMIT
                      */
-                    if ($this->limit !== null) {
-                        $queryString .= "LIMIT " . $this->limit . $newLine;
+                    if (null !== $this->limit) {
+                        $queryString .= 'LIMIT '.$this->limit.$newLine;
                     }
 
                     break;
-                case "delete":
-                    $queryString .= "DELETE " . $newLine;
+                case 'delete':
+                    $queryString .= 'DELETE '.$newLine;
 
                     /**
-                     * ADD SELECTED COLUMNS
+                     * ADD SELECTED COLUMNS.
                      */
                     $tables = array_map(function ($column) use ($newLine) {
-                        return trim($column) . $newLine;
+                        return trim($column).$newLine;
                     }, $this->columns);
                     if (!empty($this->tables)) {
-                        $queryString .= $tab . implode("$tab,", $tables);
+                        $queryString .= $tab.implode("$tab,", $tables);
                     } else {
                         $this->setTables(trim(reset($this->columns)));
                     }
 
-                    $queryString .= "FROM " . $newLine;
+                    $queryString .= 'FROM '.$newLine;
 
-                    /**
+                    /*
                      * Parse tables
                      */
                     $queryString .= $this->parseTables($newLine, $tab);
 
-                    /**
+                    /*
                      * ADD JOIN TABLES
                      */
                     foreach ($this->joinTables as $joinTable) {
                         if ($joinTable['table'] instanceof self) {
-                            $joinTable['table'] = "(" . $joinTable['table']->getQueryString() . ")";
+                            $joinTable['table'] = '('.$joinTable['table']->getQueryString().')';
                         }
                         if (!empty($joinTable['alias'])) {
-                            $joinTable['alias'] = " AS " . $joinTable['alias'];
+                            $joinTable['alias'] = ' AS '.$joinTable['alias'];
                         }
-                        $queryString .= trim($joinTable['type'] . ' ' . $joinTable['table'] . $joinTable['alias'] . $newLine . $tab . "ON " . $joinTable['relation']) . " " . $newLine;
+                        $queryString .= trim($joinTable['type'].' '.$joinTable['table'].$joinTable['alias'].$newLine.$tab.'ON '.$joinTable['relation']).' '.$newLine;
                     }
 
-                    /**
+                    /*
                      * PARSE WHERE CONDITIONS
                      */
                     $queryString .= $this->parseWhereConditions($newLine, $tab);
 
-                    /**
+                    /*
                      * ORDER BY
                      */
                     if (count($this->orderByColumns) > 0) {
-                        $queryString .= "ORDER BY " . implode(",", $this->orderByColumns) . $newLine;
+                        $queryString .= 'ORDER BY '.implode(',', $this->orderByColumns).$newLine;
                     }
 
-                    /**
+                    /*
                      * LIMIT
                      */
-                    if ($this->limit !== null) {
-                        $queryString .= "LIMIT " . $this->limit . $newLine;
+                    if (null !== $this->limit) {
+                        $queryString .= 'LIMIT '.$this->limit.$newLine;
                     }
 
                     break;
 
                 default:
-                    throw new QueryException("Invalid query type");
+                    throw new QueryException('Invalid query type');
             }
         }
-        if ($replaceParameters === true) {
+        if (true === $replaceParameters) {
             foreach ($this->getVars() as $name => $value) {
                 if (is_int($value)) {
-                    $queryString = str_replace(":" . $name, (string) $value, $queryString);
+                    $queryString = str_replace(':'.$name, (string) $value, $queryString);
                 } else {
-                    $queryString = str_replace(":" . $name, '"' . $value . '"', $queryString);
+                    $queryString = str_replace(':'.$name, '"'.$value.'"', $queryString);
                 }
             }
         }
@@ -1254,43 +1112,33 @@ class Query
         return trim($queryString);
     }
 
-    /**
-     * @return array
-     */
     public function getDatabaseTables(): array
     {
         $query = new Query($this->config);
         $query->select([
-            "table_name AS `name`",
-            "table_schema AS `schema`",
-            "engine AS `engine`",
-            "table_rows AS `tableRows`",
-            "data_length AS `dataLength`",
-            "index_length AS `indexLength`",
-            "create_time AS `createTime`",
-            "update_time AS `updateTime`",
-            "table_collation AS `tableCollation`",
-        ])->from("information_schema.tables");
-        $query->where("table_schema=DATABASE()");
+            'table_name AS `name`',
+            'table_schema AS `schema`',
+            'engine AS `engine`',
+            'table_rows AS `tableRows`',
+            'data_length AS `dataLength`',
+            'index_length AS `indexLength`',
+            'create_time AS `createTime`',
+            'update_time AS `updateTime`',
+            'table_collation AS `tableCollation`',
+        ])->from('information_schema.tables');
+        $query->where('table_schema=DATABASE()');
 
         return $query->fetchObjects();
     }
 
-    /**
-     * @return array
-     */
     public static function getExecutedQueries(): array
     {
         return self::$global['executedQueries'];
     }
 
     /**
-     * Enable result query cache
+     * Enable result query cache.
      *
-     * @param boolean $bool
-     * @param integer $lifeTime
-     * @param string|null $key
-     * @return self
      * @deprecated 1.4.1 Please use 'enableResultCache' method
      */
     public function useResultCache(bool $bool = true, int $lifeTime = 300, ?string $key = null): self
@@ -1302,11 +1150,6 @@ class Query
         return $this;
     }
 
-    /**
-     * @param integer $lifeTime
-     * @param string|null $key
-     * @return self
-     */
     public function enableResultCache(int $lifeTime = 300, ?string $key = null): self
     {
         $this->useResultCache = true;
@@ -1316,9 +1159,6 @@ class Query
         return $this;
     }
 
-    /**
-     * @return self
-     */
     public function disableResultCache(): self
     {
         $this->useResultCache = false;
@@ -1328,84 +1168,72 @@ class Query
 
     /**
      * Generate array of parameters from array values. All parameters is safety set with setVar method (bind).
-     * @param array $data
+     *
      * @return string[] Example: [":param1", ":param2", ":param3"]
      */
     public function generateParametersFromArray(array $data): array
     {
         $parameters = [];
         foreach ($data as $value) {
-            $parameters[] = ":" . $this->generateParameterName($value);
+            $parameters[] = ':'.$this->generateParameterName($value);
         }
+
         return $parameters;
     }
 
-    /**
-     *
-     * @param mixed $column
-     * @param mixed $value
-     * @param string $operator
-     * @param string $whereOperator
-     * @return self
-     */
-    private function setWhereCondition($column, $value, string $operator = "", $whereOperator = null): self
+    private function setWhereCondition(string $column, mixed $value, string $operator = '', ?string $whereOperator = null): self
     {
-        $condition = "";
-        if ($value === self::DEFAULT_VALUE) {
+        $condition = '';
+        if (self::DEFAULT_VALUE === $value) {
             $condition = $column;
         } else {
             $column = $this->escapeString($column);
             if (is_null($value)) {
-                if ($operator == "!=") {
-                    $condition = $column . " IS NOT NULL";
+                if ('!=' == $operator) {
+                    $condition = $column.' IS NOT NULL';
                 } else {
-                    $condition = $column . " IS NULL";
+                    $condition = $column.' IS NULL';
                 }
             } elseif (is_array($value)) {
                 if (count($value) > 0) {
                     $parameters = [];
                     foreach ($value as $v) {
                         $parameterName = $this->generateParameterName($v);
-                        $parameters[] = ":" . $parameterName;
+                        $parameters[] = ':'.$parameterName;
                     }
-                    if ($operator == "!=") {
-                        $operator = "NOT IN";
+                    if ('!=' == $operator) {
+                        $operator = 'NOT IN';
                     } else {
-                        $operator = "IN";
+                        $operator = 'IN';
                     }
-                    $condition = $column . " $operator (" . implode(",", $parameters) . ")";
+                    $condition = $column." $operator (".implode(',', $parameters).')';
                 } else {
-                    $condition = $column . " IS NULL";
+                    $condition = $column.' IS NULL';
                 }
             } elseif ($value instanceof self) {
                 $this->subQueries[] = $value;
-                if ($operator == "!=") {
-                    $operator = "NOT IN";
+                if ('!=' == $operator) {
+                    $operator = 'NOT IN';
                 } else {
-                    $operator = "IN";
+                    $operator = 'IN';
                 }
-                $condition = $column . " $operator ";
+                $condition = $column." $operator ";
             } else {
                 $parameterName = $this->generateParameterName($value);
-                $condition = $column . $operator . ":" . $parameterName;
+                $condition = $column.$operator.':'.$parameterName;
             }
         }
         $this->whereConditions[] = [
-            "condition" => $condition,
-            "column" => $column,
-            "value" => $value,
-            "operator" => $operator,
-            "whereOperator" => $whereOperator,
+            'condition' => $condition,
+            'column' => $column,
+            'value' => $value,
+            'operator' => $operator,
+            'whereOperator' => $whereOperator,
         ];
 
         return $this;
     }
 
-    /**
-     *
-     * @param string $type
-     * @return self
-     */
     private function setQueryType(string $type): self
     {
         $this->query['type'] = $type;
@@ -1413,9 +1241,6 @@ class Query
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     private function getQueryType(): ?string
     {
         return $this->query['type'];
@@ -1423,134 +1248,107 @@ class Query
 
     /**
      * @param string|self $table
-     * @param string $alias
-     * @return self
      */
-    private function setTables($table, string $alias = ""): self
+    private function setTables($table, string $alias = ''): self
     {
         if ($table instanceof self) {
-            /** @var Query $table */
+            /* @var Query $table */
             $this->subQueries[] = $table;
         }
         $this->tables[] = [
-            "table" => $table,
-            "alias" => $alias,
+            'table' => $table,
+            'alias' => $alias,
         ];
+
         return $this;
     }
 
-    /**
-     * @param string $type
-     * @param mixed $table
-     * @param string|null $alias
-     * @param string|null $relation
-     * @return self
-     */
-    private function setJoinTable(string $type, $table, ?string $alias = null, ?string $relation = null): self
+    private function setJoinTable(string $type, mixed $table, ?string $alias = null, ?string $relation = null): self
     {
         if ($table instanceof self) {
             $this->subQueries[] = $table;
         }
         $this->joinTables[] = [
-            "type" => $type,
-            "table" => $table,
-            "alias" => $alias,
-            "relation" => $relation,
+            'type' => $type,
+            'table' => $table,
+            'alias' => $alias,
+            'relation' => $relation,
         ];
+
         return $this;
     }
 
-    /**
-     * @param string $newLine
-     * @param string $tab
-     * @return string
-     */
     private function parseTables(string $newLine = PHP_EOL, string $tab = '  '): string
     {
         $tables = [];
         foreach ($this->tables as $table) {
             if ($table['table'] instanceof self) {
-                $table['table'] = "(" . $table['table']->getQueryString() . ")";
+                $table['table'] = '('.$table['table']->getQueryString().')';
             }
             if (!empty($table['alias'])) {
-                $table['alias'] = " AS " . $table['alias'];
+                $table['alias'] = ' AS '.$table['alias'];
             }
-            $tables[] = $table['table'] . $table['alias'];
+            $tables[] = $table['table'].$table['alias'];
         }
-        return $tab . implode("$tab,", $tables) . " " . $newLine;
+
+        return $tab.implode("$tab,", $tables).' '.$newLine;
     }
 
-    /**
-     * @param string $newLine
-     * @param string $tab
-     * @return string
-     */
     private function parseWhereConditions(string $newLine = PHP_EOL, string $tab = '  '): string
     {
-        $queryString = "";
+        $queryString = '';
         if (!empty($this->whereConditions)) {
-            $queryString .= "WHERE " . $newLine;
+            $queryString .= 'WHERE '.$newLine;
         }
         foreach ($this->whereConditions as $key => $value) {
             if ($value['value'] instanceof self) {
-                $value['condition'] .= "(" . $value['value']->getQueryString() . ")";
+                $value['condition'] .= '('.$value['value']->getQueryString().')';
             }
-            if ($key == 0) {
-                $queryString .= $tab . $value['condition'] . " " . $newLine;
+            if (0 == $key) {
+                $queryString .= $tab.$value['condition'].' '.$newLine;
             } else {
-                $queryString .= $tab . $value['whereOperator'] . " " . $value['condition'] . $newLine;
+                $queryString .= $tab.$value['whereOperator'].' '.$value['condition'].$newLine;
             }
         }
 
         return $queryString;
     }
 
-    /**
-     *
-     * @param mixed $value
-     * @param bool $bindToQuery
-     * @return string
-     */
-    private function generateParameterName($value, bool $bindToQuery = true): string
+    private function generateParameterName(mixed $value, bool $bindToQuery = true): string
     {
-        $name = sha1(uniqid("param", true) . sha1($value));
+        $name = sha1(uniqid('param', true).sha1($value));
         if ($bindToQuery) {
             $this->setVar($name, $value);
         }
+
         return $name;
     }
 
-    /**
-     *
-     * @param string $string
-     * @return string
-     */
     private function escapeString(string $string): string
     {
         if (
-            !strstr($string, ".") &&
-            !strstr($string, "`") &&
-            !strstr($string, "<") &&
-            !strstr($string, ",") &&
-            !strstr($string, ">") &&
-            !strstr($string, "=") &&
-            !strstr($string, "(") &&
-            !strstr($string, ")") &&
-            !strstr($string, " IN ") &&
-            !strstr($string, " NOT IN ") &&
-            !strstr($string, "!=")
+            !strstr($string, '.')
+            && !strstr($string, '`')
+            && !strstr($string, '<')
+            && !strstr($string, ',')
+            && !strstr($string, '>')
+            && !strstr($string, '=')
+            && !strstr($string, '(')
+            && !strstr($string, ')')
+            && !strstr($string, ' IN ')
+            && !strstr($string, ' NOT IN ')
+            && !strstr($string, '!=')
         ) {
-            $string = "`" . $string . "`";
+            $string = '`'.$string.'`';
         }
+
         return $string;
     }
 
     /**
-     * @param \ReflectionClass $reflectionClass
-     * @param \stdClass $value
-     * @return mixed
+     * @param \stdClass|mixed $value
      */
-    private function hydrateClass(\ReflectionClass $reflectionClass, $value)
+    private function hydrateClass(\ReflectionClass $reflectionClass, mixed $value): mixed
     {
         $objectInstance = $reflectionClass->newInstance();
 
@@ -1559,13 +1357,13 @@ class Query
                 continue;
             }
 
-            $type = "";
+            $type = '';
             $docComment = $property->getDocComment();
 
             if (version_compare(PHP_VERSION, '7.4.0') >= 0 && !empty($property->getType())) {
                 $type = trim(strtolower($property->getType()->getName()));
                 if ($property->getType()->allowsNull()) {
-                    $type = $type . "|null";
+                    $type = $type.'|null';
                 }
             } elseif (!empty($docComment)) {
                 if (preg_match('/@var\s+([^\s]+)/', $docComment, $matches)) {
@@ -1575,31 +1373,31 @@ class Query
 
             $property->setAccessible(true);
 
-            /**
+            /*
              * check for nullable
              */
-            if (in_array("null", explode("|", $type)) && is_null($value->{$property->getName()})) {
+            if (in_array('null', explode('|', $type)) && is_null($value->{$property->getName()})) {
                 $property->setValue($objectInstance, $value->{$property->getName()});
             } else {
-                $types = explode("|", $type);
+                $types = explode('|', $type);
 
                 switch (reset($types)) {
-                    case "int":
-                    case "integer":
-                        $property->setValue($objectInstance, (int)$value->{$property->getName()});
+                    case 'int':
+                    case 'integer':
+                        $property->setValue($objectInstance, (int) $value->{$property->getName()});
                         break;
-                    case "float":
-                    case "double":
-                        $property->setValue($objectInstance, (float)$value->{$property->getName()});
+                    case 'float':
+                    case 'double':
+                        $property->setValue($objectInstance, (float) $value->{$property->getName()});
                         break;
-                    case "string":
-                        $property->setValue($objectInstance, (string)$value->{$property->getName()});
+                    case 'string':
+                        $property->setValue($objectInstance, (string) $value->{$property->getName()});
                         break;
-                    case "bool":
-                    case "boolean":
+                    case 'bool':
+                    case 'boolean':
                         $property->setValue($objectInstance, boolval($value->{$property->getName()}));
                         break;
-                    case "datetime":
+                    case 'datetime':
                     case "\datetime":
                         $property->setValue($objectInstance, new \DateTime($value->{$property->getName()}));
                         break;

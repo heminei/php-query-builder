@@ -1,7 +1,7 @@
 {
     "name": "hemiframe/php-query-builder",
     "description": "Powerful and lightweight PHP SQL Query Builder",
-    "version": "1.5.1",
+    "version": "2.0.0",
     "keywords": [
         "PHP",
         "SQL builder",
@@ -24,12 +24,12 @@
         }
     },
     "require": {
-        "php": ">=7.1",
-        "psr/simple-cache": "^1.0"
+        "php": ">=8.0",
+        "psr/simple-cache": "^2.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.13",
-        "phpstan/phpstan": "~1.9"
+        "friendsofphp/php-cs-fixer": "^3.51",
+        "phpstan/phpstan": "~1.10"
     },
     "scripts": {
         "php-cs-fixer": "php-cs-fixer fix --dry-run --verbose",

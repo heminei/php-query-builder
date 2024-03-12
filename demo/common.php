@@ -1,42 +1,42 @@
 <?php
 
-require_once __DIR__ . "/../vendor/autoload.php";
+require_once __DIR__.'/../vendor/autoload.php';
 
 // $pdo = new \PDO("mysql:dbname=testdb;host=127.0.0.1");
 // \HemiFrame\Lib\SQLBuilder\Query::$global['pdo'] = $pdo;
 
-echo PHP_EOL . "Select query: " . PHP_EOL . PHP_EOL;
-$query = new \HemiFrame\Lib\SQLBuilder\Query();
+echo PHP_EOL.'Select query: '.PHP_EOL.PHP_EOL;
+$query = new HemiFrame\Lib\SQLBuilder\Query();
 $query->select([
-    "u.id",
-    "u.email",
-    "u.name",
-])->from("users", "u");
-$query->leftJoin("details", "d", "d.userId=u.id");
-$query->andWhere("u.status", 0);
-$query->andWhere("u.id", [1, 2, 3]);
-$query->andWhere("u.age", null);
-$query->andWhere("u.gender", null, '!=');
-$query->andWhere("(u.name IS NULL OR u.name IN (" . implode(",", $query->generateParametersFromArray(["John", "Marek", "Martin"])) ."))");
-$query->orderBy("u.id DESC");
-$query->groupBy("u.id");
+    'u.id',
+    'u.email',
+    'u.name',
+])->from('users', 'u');
+$query->leftJoin('details', 'd', 'd.userId=u.id');
+$query->andWhere('u.status', 0);
+$query->andWhere('u.id', [1, 2, 3]);
+$query->andWhere('u.age', null);
+$query->andWhere('u.gender', null, '!=');
+$query->andWhere('(u.name IS NULL OR u.name IN ('.implode(',', $query->generateParametersFromArray(['John', 'Marek', 'Martin'])).'))');
+$query->orderBy('u.id DESC');
+$query->groupBy('u.id');
 $query->paginationLimit(1, 10);
 
 var_dump($query->getQueryString(true));
 
-echo PHP_EOL . "Insert query: " . PHP_EOL . PHP_EOL;
-$query = new \HemiFrame\Lib\SQLBuilder\Query();
-$query->insertInto("users")->set([
-    "name" => 'Test',
-    "email" => 'test@test.com',
+echo PHP_EOL.'Insert query: '.PHP_EOL.PHP_EOL;
+$query = new HemiFrame\Lib\SQLBuilder\Query();
+$query->insertInto('users')->set([
+    'name' => 'Test',
+    'email' => 'test@test.com',
 ]);
-$query->onDuplicateKeyUpdate("email=:testVar")->setVar('testVar', 'testemail@test.com');
+$query->onDuplicateKeyUpdate('email=:testVar')->setVar('testVar', 'testemail@test.com');
 
 var_dump($query->getQueryString(true));
 
-echo PHP_EOL . "Insert values query: " . PHP_EOL . PHP_EOL;
-$query = new \HemiFrame\Lib\SQLBuilder\Query();
-$query->insertInto("users")->values([
+echo PHP_EOL.'Insert values query: '.PHP_EOL.PHP_EOL;
+$query = new HemiFrame\Lib\SQLBuilder\Query();
+$query->insertInto('users')->values([
     'name',
     'email',
     'age',
@@ -52,61 +52,60 @@ $query->insertInto("users")->values([
         '20',
     ],
 ]);
-$query->onDuplicateKeyUpdate("email=:testVar")->setVar('testVar', 'testemail@test.com');
+$query->onDuplicateKeyUpdate('email=:testVar')->setVar('testVar', 'testemail@test.com');
 
 var_dump($query->getQueryString(true));
 
-echo PHP_EOL . "Update query: " . PHP_EOL . PHP_EOL;
-$query = new \HemiFrame\Lib\SQLBuilder\Query();
-$query->update("users", "u")->set([
-    "u.name" => 'Test',
-    "u.email" => 'test@test.com',
+echo PHP_EOL.'Update query: '.PHP_EOL.PHP_EOL;
+$query = new HemiFrame\Lib\SQLBuilder\Query();
+$query->update('users', 'u')->set([
+    'u.name' => 'Test',
+    'u.email' => 'test@test.com',
 ]);
 $query->set('totalViews = totalViews + 1');
-$query->andWhere("status", 2, '!=');
-$query->andWhere("id", [1, 2, 3]);
-$query->andWhere("id", [10, 20, 30], '!=');
+$query->andWhere('status', 2, '!=');
+$query->andWhere('id', [1, 2, 3]);
+$query->andWhere('id', [10, 20, 30], '!=');
 
 // $query->execute();
 var_dump($query->getQueryString(true));
 
-
-echo PHP_EOL . "Delete query: " . PHP_EOL . PHP_EOL;
-$query = new \HemiFrame\Lib\SQLBuilder\Query();
-$query->delete()->from("users");
-$query->andWhere("status", 2, '!=');
-$query->andWhere("id", [1, 2, 3]);
-$query->andWhere("id", [10, 20, 30], '!=');
-$query->limit("1000");
-
-// $query->execute();
-var_dump($query->getQueryString(true));
-
-echo PHP_EOL . "Delete query with join: " . PHP_EOL . PHP_EOL;
-$query = new \HemiFrame\Lib\SQLBuilder\Query();
-$query->delete("u")->from("users", "u");
-$query->leftJoin("emails", "e", "e.userId=u.id");
-$query->andWhere("e.status", 2, '!=');
-$query->andWhere("u.id", [1, 2, 3]);
-$query->andWhere("u.id", [10, 20, 30], '!=');
-$query->andWhere("e.status", 1);
-$query->limit("1000");
+echo PHP_EOL.'Delete query: '.PHP_EOL.PHP_EOL;
+$query = new HemiFrame\Lib\SQLBuilder\Query();
+$query->delete()->from('users');
+$query->andWhere('status', 2, '!=');
+$query->andWhere('id', [1, 2, 3]);
+$query->andWhere('id', [10, 20, 30], '!=');
+$query->limit('1000');
 
 // $query->execute();
 var_dump($query->getQueryString(true));
 
-echo PHP_EOL . "Sub query: " . PHP_EOL . PHP_EOL;
-$queryInner = new \HemiFrame\Lib\SQLBuilder\Query();
-$queryInner->select()->from("user");
-$queryInner->andWhere("isActive", 1);
+echo PHP_EOL.'Delete query with join: '.PHP_EOL.PHP_EOL;
+$query = new HemiFrame\Lib\SQLBuilder\Query();
+$query->delete('u')->from('users', 'u');
+$query->leftJoin('emails', 'e', 'e.userId=u.id');
+$query->andWhere('e.status', 2, '!=');
+$query->andWhere('u.id', [1, 2, 3]);
+$query->andWhere('u.id', [10, 20, 30], '!=');
+$query->andWhere('e.status', 1);
+$query->limit('1000');
 
-$query = new \HemiFrame\Lib\SQLBuilder\Query();
+// $query->execute();
+var_dump($query->getQueryString(true));
+
+echo PHP_EOL.'Sub query: '.PHP_EOL.PHP_EOL;
+$queryInner = new HemiFrame\Lib\SQLBuilder\Query();
+$queryInner->select()->from('user');
+$queryInner->andWhere('isActive', 1);
+
+$query = new HemiFrame\Lib\SQLBuilder\Query();
 $query->select([
-    "u.id",
-    "u.name",
-])->from($queryInner, "u");
-$query->andWhere("status", 2, '!=');
-$query->limit("1000");
+    'u.id',
+    'u.name',
+])->from($queryInner, 'u');
+$query->andWhere('status', 2, '!=');
+$query->limit('1000');
 
 // $query->execute();
 var_dump($query->getQueryString(true));
