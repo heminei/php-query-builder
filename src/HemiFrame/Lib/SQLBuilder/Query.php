@@ -1181,7 +1181,7 @@ class Query
         return $parameters;
     }
 
-    private function setWhereCondition(string $column, mixed $value, string $operator = '', ?string $whereOperator = null): self
+    private function setWhereCondition(mixed $column, mixed $value, string $operator = '', ?string $whereOperator = null): self
     {
         $condition = '';
         if (self::DEFAULT_VALUE === $value) {
@@ -1189,22 +1189,22 @@ class Query
         } else {
             switch ($operator) {
                 case 'fulltext':
-                    if(is_array($column)) {
-                        $column = implode(",", $column);
+                    if (is_array($column)) {
+                        $column = implode(',', $column);
                     }
                     if (is_array($value)) {
                         if (count($value) > 0) {
                             $parameters = [];
                             foreach ($value as $v) {
                                 $parameterName = $this->generateParameterName($v);
-                                $parameters[] = ":" . $parameterName;
+                                $parameters[] = ':'.$parameterName;
                             }
-                            $condition = "MATCH($column) AGAINST(" . implode(",", $parameters) . ")";
+                            $condition = "MATCH($column) AGAINST(".implode(',', $parameters).')';
                         } else {
                             $condition = "MATCH($column) AGAINST('')";
                         }
                     } else {
-                        if(strstr(strtoupper($value), "WITH QUERY EXPANSION") || strstr(strtoupper($value), "IN BOOLEAN MODE")) {
+                        if (strstr(strtoupper($value), 'WITH QUERY EXPANSION') || strstr(strtoupper($value), 'IN BOOLEAN MODE')) {
                             $condition = "MATCH($column) AGAINST($value)";
                         } else {
                             $parameterName = $this->generateParameterName($value);
@@ -1215,38 +1215,38 @@ class Query
                 default:
                     $column = $this->escapeString($column);
                     if (is_null($value)) {
-                        if ($operator == "!=") {
-                            $condition = $column . " IS NOT NULL";
+                        if ('!=' == $operator) {
+                            $condition = $column.' IS NOT NULL';
                         } else {
-                            $condition = $column . " IS NULL";
+                            $condition = $column.' IS NULL';
                         }
                     } elseif (is_array($value)) {
                         if (count($value) > 0) {
                             $parameters = [];
                             foreach ($value as $v) {
                                 $parameterName = $this->generateParameterName($v);
-                                $parameters[] = ":" . $parameterName;
+                                $parameters[] = ':'.$parameterName;
                             }
-                            if ($operator == "!=") {
-                                $operator = "NOT IN";
+                            if ('!=' == $operator) {
+                                $operator = 'NOT IN';
                             } else {
-                                $operator = "IN";
+                                $operator = 'IN';
                             }
-                            $condition = $column . " $operator (" . implode(",", $parameters) . ")";
+                            $condition = $column." $operator (".implode(',', $parameters).')';
                         } else {
-                            $condition = $column . " IS NULL";
+                            $condition = $column.' IS NULL';
                         }
                     } elseif ($value instanceof self) {
                         $this->subQueries[] = $value;
-                        if ($operator == "!=") {
-                            $operator = "NOT IN";
+                        if ('!=' == $operator) {
+                            $operator = 'NOT IN';
                         } else {
-                            $operator = "IN";
+                            $operator = 'IN';
                         }
-                        $condition = $column . " $operator ";
+                        $condition = $column." $operator ";
                     } else {
                         $parameterName = $this->generateParameterName($value);
-                        $condition = $column . $operator . ":" . $parameterName;
+                        $condition = $column.$operator.':'.$parameterName;
                     }
                     break;
             }
