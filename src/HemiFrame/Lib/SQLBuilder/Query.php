@@ -341,7 +341,7 @@ class Query
      *
      * @return T[]|\stdClass[]
      */
-    public function fetchObjects(?string $hydrationClass = \stdClass::class): array
+    public function fetchObjects(?string $hydrationClass = null): array
     {
         $cacheKey = $this->resultCacheKey;
         if (empty($cacheKey)) {
