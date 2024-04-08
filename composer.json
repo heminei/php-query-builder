@@ -1,7 +1,7 @@
 {
     "name": "hemiframe/php-query-builder",
     "description": "Powerful and lightweight PHP SQL Query Builder",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "keywords": [
         "PHP",
         "SQL builder",

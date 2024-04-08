@@ -1344,7 +1344,7 @@ class Query
 
     private function generateParameterName(mixed $value, bool $bindToQuery = true): string
     {
-        $name = sha1(uniqid('param', true).sha1($value));
+        $name = sha1(uniqid('param', true));
         if ($bindToQuery) {
             $this->setVar($name, $value);
         }
