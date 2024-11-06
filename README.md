@@ -1,6 +1,6 @@
 # php-query-builder
 
-Powerfull and lightweight PHP SQL Query Builder with fluid interface SQL syntax unsing bindings and complicated query generation
+Powerful and lightweight PHP SQL Query Builder with fluid interface SQL syntax using bindings and complicated query generation
 
 ## Features
 
