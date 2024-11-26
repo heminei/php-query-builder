@@ -109,3 +109,23 @@ $query->limit('1000');
 
 // $query->execute();
 var_dump($query->getQueryString(true));
+
+/*
+ * Skip duplicate joins
+ */
+echo PHP_EOL.'Select query: '.PHP_EOL.PHP_EOL;
+$query = new HemiFrame\Lib\SQLBuilder\Query([
+    'skipDuplicateJoins' => true,
+]);
+$query->select([
+    'u.id',
+    'u.email',
+    'u.name',
+])->from('users', 'u');
+$query->leftJoin('details', 'd', 'd.userId=u.id');
+$query->leftJoin('details', 'd', 'd.userId=u.id'); // Duplicate join. Will be skipped.
+$query->andWhere('u.gender', null, '!=');
+$query->groupBy('u.id');
+$query->paginationLimit(1, 10);
+
+var_dump($query->getQueryString(true));

@@ -1,3 +1,4 @@
 /vendor/
 /demo/database.sqlite
 /.php-cs-fixer.cache
+/.env

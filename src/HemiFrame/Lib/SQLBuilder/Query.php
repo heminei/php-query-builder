@@ -22,6 +22,7 @@ class Query
             'implementation' => null,
             'prefix' => 'query-result-cache',
         ],
+        'skipDuplicateJoins' => true,
     ];
 
     /**
@@ -294,8 +295,8 @@ class Query
     public function execute(): \PDOStatement
     {
         $timeStart = microtime(true);
-
-        $PDOStatement = $this->prepare($this->getQueryString());
+        $queryString = $this->getQueryString();
+        $PDOStatement = $this->prepare($queryString);
 
         /*
          * bind vars
@@ -319,15 +320,16 @@ class Query
         if (!empty($error[2])) {
             if (!empty($this->config['logs']['errors'])) {
                 $fileErrors = fopen($this->config['logs']['errors'], 'a+');
-                $text = $error[2].' - '.$this->getQueryString()."\n\n";
+                $text = $error[2].' - '.$queryString."\n\n";
                 fwrite($fileErrors, $text);
                 fclose($fileErrors);
             }
-            throw new QueryException($error[2].' ==> '.$this->getQueryString());
+            throw new QueryException($error[2].' ==> '.$queryString);
         }
 
         self::$global['executedQueries'][] = [
-            'query' => $this->getQueryString(),
+            'query' => $queryString,
+            'queryWithParams' => $this->getQueryString(true),
             'time' => $this->getExecutionTime(),
         ];
 
@@ -1280,7 +1282,6 @@ class Query
     private function setTables($table, string $alias = ''): self
     {
         if ($table instanceof self) {
-            /* @var Query $table */
             $this->subQueries[] = $table;
         }
         $this->tables[] = [
@@ -1293,6 +1294,15 @@ class Query
 
     private function setJoinTable(string $type, mixed $table, ?string $alias = null, ?string $relation = null): self
     {
+        if (true == $this->config['skipDuplicateJoins']) {
+            $check = array_filter($this->joinTables, function ($joinTable) use ($table, $alias, $relation) {
+                return $joinTable['table'] == $table && $joinTable['alias'] == $alias && $joinTable['relation'] == $relation;
+            });
+            if (count($check) > 0) {
+                return $this;
+            }
+        }
+
         if ($table instanceof self) {
             $this->subQueries[] = $table;
         }
