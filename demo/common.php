@@ -113,7 +113,7 @@ var_dump($query->getQueryString(true));
 /*
  * Skip duplicate joins
  */
-echo PHP_EOL.'Select query: '.PHP_EOL.PHP_EOL;
+echo PHP_EOL.'Select query with duplicate join: '.PHP_EOL.PHP_EOL;
 $query = new HemiFrame\Lib\SQLBuilder\Query([
     'skipDuplicateJoins' => true,
 ]);

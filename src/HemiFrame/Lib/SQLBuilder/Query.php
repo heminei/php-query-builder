@@ -10,9 +10,9 @@ class Query
     public const DEFAULT_VALUE = 'f056c6dc7b3fc49ea4655853bea9b1d4e637a52d3d4a582985175f513fb9589241e21657f686e633c36760416031546cfe283d9961b9ac19aa2c45175dbbc9dd';
 
     /**
-     * @var array
+     * @var array<mixed>
      */
-    public static $global = [
+    public static array $global = [
         'pdo' => null,
         'logs' => [
             'errors' => null,
@@ -24,118 +24,84 @@ class Query
         ],
         'skipDuplicateJoins' => true,
     ];
-
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $config = [];
-
+    private array $config = [];
+    private ?\PDO $pdo;
     /**
-     * @var \PDO|null
+     * @var array<mixed>
      */
-    private $pdo;
-
-    /**
-     * @var array
-     */
-    private $query = [
+    private array $query = [
         'type' => null,
     ];
-
     /**
-     * @var array
+     * @var array<int, self>
      */
-    private $subQueries = [];
-
+    private array $subQueries = [];
+    private float $executionTime = 0;
     /**
-     * @var float
+     * @var array<mixed>
      */
-    private $executionTime = 0;
-
     private array $vars = [];
-
-    private mixed $tables;
-
+    private mixed $tables = null;
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $columns = [];
-
+    private array $columns = [];
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $joinTables = [];
-
+    private array $joinTables = [];
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $whereConditions = [];
-
+    private array $whereConditions = [];
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $havingConditions = [];
-
+    private array $havingConditions = [];
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $groupByColumns = [];
-
+    private array $groupByColumns = [];
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $orderByColumns = [];
-
+    private array $orderByColumns = [];
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $setColumns = [];
-
+    private array $setColumns = [];
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $values = [];
+    private array $values = [];
 
     /**
      * @var string|int
      */
     private $limit;
 
+    private ?string $onDuplicateKeyUpdate = null;
     /**
-     * @var string
+     * @var array<mixed>
      */
-    private $onDuplicateKeyUpdate;
+    private array $unions = [];
+
+    private ?string $plainQueryString = null;
+
+    private bool $useResultCache = false;
+
+    private ?\Psr\SimpleCache\CacheInterface $resultCacheImplementation = null;
+
+    private int $resultCacheLifeTime = 0;
+
+    private ?string $resultCacheKey;
 
     /**
-     * @var array
+     * @param array<mixed> $config
      */
-    private $unions = [];
-
-    /**
-     * @var string|null
-     */
-    private $plainQueryString;
-
-    /**
-     * @var bool
-     */
-    private $useResultCache = false;
-
-    /**
-     * @var \Psr\SimpleCache\CacheInterface|null
-     */
-    private $resultCacheImplementation;
-
-    /**
-     * @var int
-     */
-    private $resultCacheLifeTime = 0;
-
-    /**
-     * @var string|null
-     */
-    private $resultCacheKey;
-
     public function __construct(array $config = [])
     {
         $this->config = array_merge(self::$global);
@@ -154,14 +120,9 @@ class Query
 
     /**
      * Set PDO object.
-     *
-     * @throws QueryException
      */
     public function setPdo(\PDO $pdo): self
     {
-        if (!$pdo instanceof \PDO) {
-            throw new QueryException('Set PDO object');
-        }
         $this->pdo = $pdo;
 
         return $this;
@@ -177,9 +138,6 @@ class Query
         if (empty($name)) {
             throw new QueryException('Enter var name');
         }
-        if (!is_string($name)) {
-            throw new QueryException('Var name must be string');
-        }
         if ($value instanceof \DateTime) {
             $value = $value->format('Y-m-d H:i:s');
         }
@@ -189,11 +147,11 @@ class Query
         return $this;
     }
 
+    /**
+     * @param array<mixed> $array
+     */
     public function setVars(array $array): self
     {
-        if (!is_array($array)) {
-            throw new QueryException('Invalid array');
-        }
         foreach ($array as $key => $value) {
             $this->setVar($key, $value);
         }
@@ -201,11 +159,17 @@ class Query
         return $this;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getValues(): array
     {
         return $this->values;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getVars(): array
     {
         $vars = [];
@@ -222,6 +186,9 @@ class Query
         return $vars;
     }
 
+    /**
+     * @return self[]
+     */
     public function getSubQueries(): array
     {
         return $this->subQueries;
@@ -431,6 +398,9 @@ class Query
         return $data;
     }
 
+    /**
+     * @return array<int, mixed>
+     */
     public function fetchArrays(): array
     {
         $cacheKey = $this->resultCacheKey;
@@ -496,6 +466,9 @@ class Query
         return $data;
     }
 
+    /**
+     * @return array<mixed>|null
+     */
     public function fetchFirstArray(): ?array
     {
         $cacheKey = $this->resultCacheKey;
@@ -570,7 +543,7 @@ class Query
     }
 
     /**
-     * @param string|array $column
+     * @param string|array<mixed> $column
      */
     public function set(mixed $column, mixed $value = self::DEFAULT_VALUE): self
     {
@@ -592,7 +565,7 @@ class Query
     }
 
     /**
-     * @param string|array $values
+     * @param string|array<mixed> $values
      */
     public function values(mixed $columns, $values): self
     {
@@ -632,9 +605,6 @@ class Query
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function update(mixed $table, string $alias = ''): self
     {
         if (empty($table)) {
@@ -653,25 +623,16 @@ class Query
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function delete(mixed $table = null): self
     {
-        $this->setQueryType('delete');
-        if (is_string($table)) {
-            $arrayColumns = explode(',', $table);
-            $this->columns = array_merge($this->columns, $arrayColumns);
-        } elseif (is_array($table)) {
-            $this->columns = array_merge($this->columns, $table);
+        if (!empty($table)) {
+            $this->setTables($table);
         }
+        $this->setQueryType('delete');
 
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function from(mixed $table, string $alias = ''): self
     {
         if (empty($table)) {
@@ -682,9 +643,6 @@ class Query
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function leftJoin(mixed $table, string $alias, string $relation): self
     {
         $this->setJoinTable('LEFT JOIN', $table, $alias, $relation);
@@ -692,9 +650,6 @@ class Query
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function rightJoin(mixed $table, string $alias, string $relation): self
     {
         $this->setJoinTable('RIGHT JOIN', $table, $alias, $relation);
@@ -702,9 +657,6 @@ class Query
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function innerJoin(mixed $table, string $alias, string $relation): self
     {
         $this->setJoinTable('INNER JOIN', $table, $alias, $relation);
@@ -712,9 +664,6 @@ class Query
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function straightJoin(mixed $table, string $alias, string $relation): self
     {
         $this->setJoinTable('STRAIGHT_JOIN', $table, $alias, $relation);
@@ -1114,6 +1063,9 @@ class Query
         return trim($queryString);
     }
 
+    /**
+     * @return \stdClass[]
+     */
     public function getDatabaseTables(): array
     {
         $query = new Query($this->config);
@@ -1133,6 +1085,9 @@ class Query
         return $query->fetchObjects();
     }
 
+    /**
+     * @return array<mixed>
+     */
     public static function getExecutedQueries(): array
     {
         return self::$global['executedQueries'];
@@ -1170,6 +1125,8 @@ class Query
 
     /**
      * Generate array of parameters from array values. All parameters is safety set with setVar method (bind).
+     *
+     * @param array<mixed> $data
      *
      * @return string[] Example: [":param1", ":param2", ":param3"]
      */
@@ -1295,8 +1252,21 @@ class Query
     private function setJoinTable(string $type, mixed $table, ?string $alias = null, ?string $relation = null): self
     {
         if (true == $this->config['skipDuplicateJoins']) {
-            $check = array_filter($this->joinTables, function ($joinTable) use ($table, $alias, $relation) {
-                return $joinTable['table'] == $table && $joinTable['alias'] == $alias && $joinTable['relation'] == $relation;
+            $check = array_filter($this->joinTables, function ($joinTable) use ($type, $table, $alias, $relation) {
+                if ($joinTable['type'] != $type) {
+                    return false;
+                }
+                if ($joinTable['table'] != $table) {
+                    return false;
+                }
+                if ($joinTable['alias'] != $alias) {
+                    return false;
+                }
+                if ($joinTable['relation'] != $relation) {
+                    return false;
+                }
+
+                return true;
             });
             if (count($check) > 0) {
                 return $this;
@@ -1398,7 +1368,7 @@ class Query
             $type = '';
             $docComment = $property->getDocComment();
 
-            if (version_compare(PHP_VERSION, '7.4.0') >= 0 && !empty($property->getType())) {
+            if (!empty($property->getType())) {
                 $type = trim(strtolower($property->getType()->getName()));
                 if ($property->getType()->allowsNull()) {
                     $type = $type.'|null';
