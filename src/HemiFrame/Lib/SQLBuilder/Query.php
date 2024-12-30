@@ -97,7 +97,7 @@ class Query
 
     private int $resultCacheLifeTime = 0;
 
-    private ?string $resultCacheKey;
+    private ?string $resultCacheKey = null;
 
     /**
      * @param array<mixed> $config
