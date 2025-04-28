@@ -1356,7 +1356,7 @@ class Query
         } else {
             switch ($operator) {
                 case 'fulltext':
-                    if(is_array($column)) {
+                    if (is_array($column)) {
                         $column = implode(",", $column);
                     }
                     if (is_array($value)) {
@@ -1371,7 +1371,7 @@ class Query
                             $condition = "MATCH($column) AGAINST('')";
                         }
                     } else {
-                        if(strstr(strtoupper($value), "WITH QUERY EXPANSION") || strstr(strtoupper($value), "IN BOOLEAN MODE")) {
+                        if (strstr(strtoupper($value), "WITH QUERY EXPANSION") || strstr(strtoupper($value), "IN BOOLEAN MODE")) {
                             $condition = "MATCH($column) AGAINST($value)";
                         } else {
                             $parameterName = $this->generateParameterName($value);
@@ -1541,7 +1541,7 @@ class Query
      */
     private function generateParameterName($value, bool $bindToQuery = true): string
     {
-        $name = sha1(uniqid("param", true) . sha1($value));
+        $name = sha1(uniqid("param", true));
         if ($bindToQuery) {
             $this->setVar($name, $value);
         }
