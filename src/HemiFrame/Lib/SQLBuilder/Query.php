@@ -529,9 +529,12 @@ class Query
         return $this;
     }
 
-    public function select(mixed $columns = '*'): self
+    public function select(mixed $columns = '*', $clear = false): self
     {
         $this->setQueryType('select');
+        if ($clear) {
+            $this->columns = [];
+        }
         if (is_string($columns)) {
             $arrayColumns = explode(',', $columns);
             $this->columns = array_merge($this->columns, $arrayColumns);
